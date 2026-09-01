@@ -1,0 +1,23 @@
+# Python / uv
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+*.egg-info/
+
+# workshop runtime state
+challenges/*/runs/
+**/reads.jsonl
+**/verdict.json
+**/stream.jsonl
+.env
+
+# facilitator-only, not for participants
+facilitator/solutions.md
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/
+!.vscode/extensions.json
