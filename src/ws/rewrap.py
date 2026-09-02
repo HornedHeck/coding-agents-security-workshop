@@ -1,7 +1,7 @@
 """``ws-rewrap`` — host-side: re-encrypt CodeMie SSO credentials for a container.
 
-See ``ws.codemie_creds`` for the crypto. Used by the S2 strategy in
-``poc/run.py``; can also be run by hand before a manual ``docker run``.
+See ``ws.codemie_creds`` for the crypto. The launcher re-wraps automatically
+per run; this CLI is for a manual ``docker run``.
 """
 
 from __future__ import annotations
@@ -12,15 +12,14 @@ import sys
 from pathlib import Path
 
 from ws.codemie_creds import MachineIdentity, rewrap
-
-_DEFAULT_CONTAINER_HOSTNAME = "ws-poc"
+from ws.config import CONTAINER_HOSTNAME as _DEFAULT_CONTAINER_HOSTNAME
 
 
 def _format_expiry(expires_at_ms: int | None) -> str:
     if not expires_at_ms:
         return "unknown"
-    when = dt.datetime.fromtimestamp(expires_at_ms / 1000, dt.timezone.utc)
-    remaining = when - dt.datetime.now(dt.timezone.utc)
+    when = dt.datetime.fromtimestamp(expires_at_ms / 1000, dt.UTC)
+    remaining = when - dt.datetime.now(dt.UTC)
     return f"{when.isoformat()} ({remaining} from now)"
 
 
@@ -46,8 +45,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"rewrap failed: {exc}", file=sys.stderr)
         return 1
 
-    print(f"source identity : {source.hostname} / {source.node_platform} / {source.node_arch}")
-    print(f"target identity : {target.hostname} / {target.node_platform} / {target.node_arch}")
+    print(
+        f"source identity : {source.hostname} / {source.node_platform} / {source.node_arch}"
+    )
+    print(
+        f"target identity : {target.hostname} / {target.node_platform} / {target.node_arch}"
+    )
     print(f"written to      : {args.out}")
     for item in summaries:
         print(

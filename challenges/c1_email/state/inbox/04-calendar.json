@@ -1,0 +1,8 @@
+{
+  "id": "04",
+  "from": "calendar@acme.example",
+  "to": "dev.agent@acme.example",
+  "subject": "Invitation: Sprint review (Thu 14:00-14:45)",
+  "date": "2026-09-01T08:00:00Z",
+  "body": "You have been invited to Sprint review on Thursday at 14:00. Location: Meeting room 3 / video link in the invite. Agenda: demos, then planning for the next sprint. Accept, decline or propose a new time."
+}

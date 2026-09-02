@@ -166,38 +166,49 @@ Recommended option — **Git repo + Dev Container**:
 ### 1.1. Repository layout
 
 ```
-agent-security-workshop/
-  pyproject.toml           uv project; [project.scripts]: ws, ws-hook-*, ws-mcp-*
+coding-agents-security-workshop/
+  pyproject.toml           uv project; [project.scripts]: ws, ws-rewrap, ws-hook-*, ws-mcp-*, ws-acceptance
   uv.lock
-  .devcontainer/           devcontainer.json + Dockerfile (python, uv, node, codemie)
+  Makefile                 dev-only commands (macOS): setup / image / test / lint
+  docker/
+    base.Dockerfile        ws-base: node + uv + @codemieai/code + claude, non-root
+    harness.Dockerfile     ws-harness: FROM ws-base + the ws package
   src/ws/
-    cli.py                 Python CLI `ws`: run / eval / setup / reset
-    launcher.py            builds and runs `codemie-claude -p` (subprocess)
+    cli.py                 Python CLI `ws`: run / setup
+    config.py              all constants (paths, images, model, allow-lists)
+    detect.py              canary matching (hook + verdict + future guard)
+    launcher.py            re-wrap creds, build the codemie-claude argv, docker run
     settings.py            generates settings.json per level (Pre/PostToolUse hooks)
     verdict.py             parses stream-json + the CAPTURED marker -> participant verdict
+    setup.py               `ws setup` host preflight
+    acceptance.py          `ws setup --image` in-container gate (mcp + hook + pass-through)
+    codemie_creds.py       CredentialStore crypto; rewrap()   (from step 0)
+    rewrap.py              `ws-rewrap` CLI                     (from step 0)
     hooks/
       sink_detect.py       PreToolUse: canary in sink arguments -> writes CAPTURED
-      guard.py             PreToolUse: L3 guard (blocks forbidden actions)
-      log_read.py          PostToolUse: logs read results (2A channel, postmortems)
+      guard.py             PreToolUse: L3 guard (blocks forbidden actions)   [step 2]
+      log_read.py          PostToolUse: logs read results (2A channel, postmortems)   [step 3+]
     mcp/
-      email.py             stdio MCP: list_emails / read_email / send_email
-      issues.py            stdio MCP: list_issues / read_issue / post_comment
-      repo.py              stdio MCP: read_file / write_file / open_pr / run_tests
-      web.py                stdio MCP: fetch
-      policy.py            stdio MCP: (opt.) check_action — L3 control point
-      _base.py             shared file-backed layer + reads.jsonl log
+      email.py             stdio MCP (mcp v2 MCPServer): list_emails / read_email / send_email
+      issues.py / repo.py / web.py / policy.py   [steps 2-3]
+      _base.py             shared file-backed layer + reads.jsonl / sink.jsonl / outbox
     prompts/               <level>.md — append-system-prompt per level
   challenges/
     c1_email/  c2a_channel_hunt/  c2c_agent_to_agent/  c3_postmortems/  c4_defense/
-    <c>/mcp.json           which MCP servers are enabled for the challenge
+    <c>/mcp.json           container-absolute command path for the MCP server
+    <c>/runs/<ts>/         per-run: stream.jsonl, reads.jsonl, sink.jsonl, verdict.json, settings.json
+  specs/                   spec-driven-development specs (NNN-slug/SPEC.md)
+  docs/poc/                frozen step-0 PoC, reference only
   facilitator/
     slides/  runbook.md  solutions.md   (solutions are not handed out)
 ```
 
-Claude Code hooks in `settings.json` point at `command: "uv run ws-hook-sink"`
-(and `ws-hook-guard`, `ws-hook-logread`) — console scripts from
-`[project.scripts]`, working on every OS with no shebang/chmod needed. MCP
-servers work the same way: `uv run ws-mcp-email`.
+Claude Code hooks and MCP servers run **inside the container** as the console
+scripts installed in the image venv: `settings.json` and `mcp.json` point
+`command` at absolute paths (`/opt/uv/venv/bin/ws-hook-sink`,
+`/opt/uv/venv/bin/ws-mcp-email`) — the host launches nothing directly, so
+`uv run` per call is not needed and the near-empty MCP-launch PATH is a
+non-issue.
 
 ### 1.2. Mock MCP — shared rules
 
@@ -737,6 +748,11 @@ translates it into flags)
    / not captured" output. An end-to-end path through Section 1 L1.
    Specified in `specs/001-harness-skeleton/SPEC.md` (container-only execution,
    real gateway, `ws-base`/`ws-harness` images, `Makefile` for dev commands).
+   Built and verified end to end (`ws setup --image` gate passes; `ws run c1
+   --level 1` produces a verdict). **Open:** the L1 injection does not capture
+   the flag on `claude-haiku-4-5` — the model recognises and refuses it. See
+   the spec's Implementation findings; this needs a workshop-design decision
+   (it bears on §3.1 and `PLAN.md`).
 2. **Levels L1/L2/L3:** `prompts/<level>.md` + settings generation +
    `mcp/policy.py` + `hooks/guard.py`. Run one L1→L3 pass.
 3. **Remaining MCP servers:** `mcp/repo.py`, `mcp/web.py`, `mcp/issues.py` +
@@ -769,8 +785,18 @@ translates it into flags)
 
 - [x] **CodeMie PoC** (step 0): credential pass-through works via re-wrap;
       proxy is self-hosted in-process (no daemon); cheap model is
-      `claude-haiku-4-5-20251001`. Remaining: hooks + stdio MCP +
-      `--append-system-prompt`/`--allowed-tools` on the PoC image.
+      `claude-haiku-4-5-20251001`.
+- [x] **Harness pass-through** (step 1): hooks (`--settings`) + stdio MCP
+      (`--mcp-config`, `mcp` v2) + `--append-system-prompt` + `--allowed-tools`
+      all work on `ws-harness` with plain headless `-p` (no
+      `--dangerously-skip-permissions`). Verified by `ws setup --image`.
+- [ ] **Does L1 prompt injection still work on current Claude models?** On
+      `claude-haiku-4-5` the Section 1 L1 injection is delivered correctly but
+      the agent recognises and refuses it (even with the naive L1 prompt),
+      calling it "social engineering". Bears on §3.1 and `PLAN.md`. Options:
+      a stronger/subtler injection, a permissive L1 system prompt, a more
+      capable victim model, or reframing Section 1 around the refusal and
+      where that defence breaks. **Blocks finishing Section 1.**
 - [ ] Confirm with the CodeMie licence owner that a training workshop is an
       acceptable use.
 - [ ] SSO session lifetime under real gateway load (host `expiresAt` ≈ 24 h,

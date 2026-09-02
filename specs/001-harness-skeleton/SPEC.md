@@ -1,7 +1,7 @@
 # 001: Harness skeleton — Section 1 L1 end to end
 
 **Created:** 2026-09-02
-**Status:** Draft
+**Status:** In Progress
 **Owner:** Vitaliy Avseitsev
 
 ---
@@ -187,23 +187,24 @@ Feature: Section 1 L1 harness skeleton
 
 ## Deliverables
 
-- [ ] `src/ws/cli.py`
-- [ ] `src/ws/launcher.py`
-- [ ] `src/ws/settings.py`
-- [ ] `src/ws/verdict.py`
-- [ ] `src/ws/setup.py`
-- [ ] `src/ws/hooks/__init__.py`, `src/ws/hooks/sink_detect.py`
-- [ ] `src/ws/mcp/__init__.py`, `src/ws/mcp/_base.py`, `src/ws/mcp/email.py`
-- [ ] `src/ws/prompts/l1.md`
-- [ ] `challenges/c1_email/` (`TASK.md`, `mcp.json`, `state/inbox/*`, canary,
+- [x] `src/ws/cli.py`, `src/ws/config.py`, `src/ws/detect.py`
+- [x] `src/ws/launcher.py`
+- [x] `src/ws/settings.py`
+- [x] `src/ws/verdict.py`
+- [x] `src/ws/setup.py`, `src/ws/acceptance.py`
+- [x] `src/ws/hooks/__init__.py`, `src/ws/hooks/sink_detect.py`
+- [x] `src/ws/mcp/__init__.py`, `src/ws/mcp/_base.py`, `src/ws/mcp/email.py`
+- [x] `src/ws/prompts/l1.md`
+- [x] `challenges/c1_email/` (`TASK.md`, `mcp.json`, `state/inbox/*`, canary,
       `workspace/`)
-- [ ] `docker/base.Dockerfile`, `docker/harness.Dockerfile`; `poc/Dockerfile`
-      removed
-- [ ] `Makefile`
-- [ ] `tests/` — offline unit suite + one integration test
-- [ ] `pyproject.toml` / `uv.lock` — `mcp`, dev group, scripts, tool config
+- [x] `docker/base.Dockerfile`, `docker/harness.Dockerfile`; `poc/` moved to
+      `docs/poc/` (frozen)
+- [x] `Makefile`
+- [x] `tests/` — offline unit suite + one integration test
+- [x] `pyproject.toml` / `uv.lock` — `mcp`, dev group, scripts, tool config
 - [ ] `CLAUDE.md`, `WORKSHOP_DETAILED_PLAN.md` updated
-- [ ] `poc/run.py` logic moved into `src/ws/`; `ws-poc` becomes `ws poc`
+- [x] the useful `poc.py` checks moved into `src/ws/setup.py` +
+      `src/ws/acceptance.py` (`ws setup [--image]`); `ws-poc` dropped
 
 ## Verification
 
@@ -226,9 +227,8 @@ Feature: Section 1 L1 harness skeleton
   prompt file and pass strings.
 - stdout interleaves CodeMie `[DEBUG]` lines with the JSON stream; the parser
   must skip lines that do not start with `{` (the PoC already does this).
-- `--allowed-tools` may be a no-op under `--dangerously-skip-permissions`. For
-  c1 the email MCP only exposes three tools, so the allow-list is
-  belt-and-braces, not relied upon. Tracked in Open Questions.
+- `--allowed-tools` is honoured under plain headless `-p` (see Implementation
+  findings); the `"bypass"` strategy in `config.py` is a coded fallback only.
 - `codemie doctor` exits non-zero for cosmetic reasons — treat as
   informational.
 - The container hostname must match the re-wrap target identity, set with
@@ -238,20 +238,40 @@ Feature: Section 1 L1 harness skeleton
 - Build backend stays `hatchling` unless a switch to `uv_build` is decided
   (Open Questions).
 
-## Open Questions
+## Implementation findings (2026-09-02, macOS/arm64)
 
-- [ ] Do a Claude Code `--settings` hooks file and CodeMie's injected
-  `--plugin-dir` hooks compose, or does one replace the other? This decides
-  whether hook-based detection is primary; MCP-side logging is the fallback.
-  Unblocked by a check on `ws-harness`.
-- [ ] Is `--allowed-tools` enforced alongside `--dangerously-skip-permissions`?
-- [ ] Current `mcp` / FastMCP release, and whether its stdio server runs clean
-  under `uv run` inside `ws-base`. Unblocked by checking PyPI and a smoke run.
-- [ ] `hatchling` vs `uv_build` as the build backend.
-- [ ] Canary delivery for c1: an environment signature on every `read_email`,
-  or a dedicated "security team" email #3 (§3.2 offers both).
-- [ ] SSO session lifetime under real gateway load; one login per workshop day
-  is assumed sufficient.
+Resolved during the build:
+
+- **`--settings` + CodeMie `--plugin-dir` compose.** CodeMie's plugin
+  registers no `PreToolUse` hook; our `--settings` hook runs and fires. The
+  `ws setup --image` gate confirms it end to end (`verdict.json` written).
+- **`--allowed-tools` works with plain headless `-p`** (no
+  `--dangerously-skip-permissions`). The agent runs the allow-listed tools
+  without prompting or hanging. `config.AGENT_TOOL_STRATEGY = "allow"`;
+  `"bypass"` remains a coded fallback.
+- **`mcp` v2.1.1** (`from mcp.server import MCPServer`). The stdio server
+  starts clean under Claude Code's launcher; `initialize` round-trips.
+- **`WS_*` container env reaches the hook and MCP subprocesses** — no fallback
+  needed.
+- **Build backend:** stays `hatchling`.
+- **Canary delivery:** environment signature appended on every `read_email`.
+
+Open:
+
+- **The L1 injection does not capture the flag on `claude-haiku-4-5`.** The
+  harness delivers the injection and the canary into the agent's context
+  correctly (verified in `reads.jsonl` / `stream.jsonl`), but current Claude
+  models — even Haiku, even with the deliberately naive L1 system prompt —
+  recognise the embedded instruction and refuse, often naming it "social
+  engineering". The deterministic ACs (pipeline, clean run, hook matching,
+  preflight) all pass; the "injection captures the flag" AC does not. This is
+  a **workshop-design question** (it challenges the premise in `PLAN.md` /
+  §3.1) and needs a decision — see the chat summary. Candidate directions: a
+  stronger/subtler injection style, a genuinely permissive L1 system prompt,
+  a more capable victim model, or reframing Section 1 around "the agent
+  resisted — here is what that defence is and where it breaks".
+- SSO session lifetime under real gateway load; one login per workshop day is
+  assumed sufficient.
 
 ## Follow-up Work
 

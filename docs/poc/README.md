@@ -1,5 +1,11 @@
 # PoC: CodeMie credential pass-through into Docker
 
+> **Frozen reference.** Superseded by `docker/` (the `ws-base` / `ws-harness`
+> images) and `src/ws/` (the `ws` CLI). Kept for the write-up only; the
+> `run.py` / `Dockerfile` here are a snapshot of build-checklist step 0 and are
+> not maintained. To be removed before publishing.
+
+
 Answers one question for `WORKSHOP_DETAILED_PLAN.md` §9 step 0: **can a
 containerised `codemie-claude` reach the CodeMie gateway using a credential
 that lives on the host, and how?** Nothing else — no MCP, no hooks, no levels.

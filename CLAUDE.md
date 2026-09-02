@@ -40,11 +40,14 @@ When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
 - **Project and dependency management — `uv`** (`pyproject.toml` + `uv.lock`).
   A single entry point — the Python CLI `ws` (`uv run ws run c1 --level 1`,
   `ws eval c4`, `ws setup`).
-- **mock MCP** — separate stdio MCP servers in Python (`uv run
-  ws-mcp-<name>`), file-backed.
-- **Claude Code hooks** (`PreToolUse`/`PostToolUse`) — `command: "uv run
-  ws-hook-*"`, Python, reading JSON from stdin. These drive sink detection,
-  flag-capture detection, and the guard.
+- **mock MCP** — separate stdio MCP servers in Python (`mcp` v2 `MCPServer`),
+  file-backed, run **inside the container** as the venv console script
+  (`command: "/opt/uv/venv/bin/ws-mcp-<name>"` in `mcp.json`).
+- **Claude Code hooks** (`PreToolUse`/`PostToolUse`) — `command:
+  "/opt/uv/venv/bin/ws-hook-*"` in the generated `settings.json`, Python,
+  reading JSON from stdin. These drive sink detection, flag-capture detection,
+  and the guard. Absolute in-container paths, not `uv run` (the host launches
+  nothing directly).
 - **Levels L1/L2/L3** — `--append-system-prompt` + a generated
   `settings.json` + the `ws-hook-guard` hook + `policy_mcp`.
 

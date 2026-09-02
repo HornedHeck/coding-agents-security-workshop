@@ -45,7 +45,7 @@ class MachineIdentity:
     node_arch: str
 
     @classmethod
-    def for_host(cls) -> "MachineIdentity":
+    def for_host(cls) -> MachineIdentity:
         system = platform.system()
         machine = platform.machine().lower()
         if system not in _NODE_PLATFORM:

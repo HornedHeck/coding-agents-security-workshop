@@ -45,10 +45,14 @@ def _run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
 def build_image() -> bool:
     proc = _run(
         [
-            "docker", "build",
-            "--platform", _linux_platform(),
-            "-t", _IMAGE,
-            "-f", str(_REPO_ROOT / "poc" / "Dockerfile"),
+            "docker",
+            "build",
+            "--platform",
+            _linux_platform(),
+            "-t",
+            _IMAGE,
+            "-f",
+            str(_REPO_ROOT / "poc" / "Dockerfile"),
             str(_REPO_ROOT),
         ]
     )
@@ -57,17 +61,24 @@ def build_image() -> bool:
 
 def _common_run_args(strategy: str, model: str) -> list[str]:
     return [
-        "docker", "run", "--rm",
-        "--platform", _linux_platform(),
-        "-e", f"WS_POC_STRATEGY={strategy}",
-        "-e", f"WS_POC_MODEL={model}",
+        "docker",
+        "run",
+        "--rm",
+        "--platform",
+        _linux_platform(),
+        "-e",
+        f"WS_POC_STRATEGY={strategy}",
+        "-e",
+        f"WS_POC_MODEL={model}",
     ]
 
 
 def run_s1(codemie_home: Path, model: str) -> int:
     args = _common_run_args("s1", model) + [
-        "--hostname", platform.node(),
-        "-v", f"{codemie_home}:/home/node/.codemie:ro",
+        "--hostname",
+        platform.node(),
+        "-v",
+        f"{codemie_home}:/home/node/.codemie:ro",
         _IMAGE,
     ]
     return _run(args).returncode
@@ -78,19 +89,27 @@ def run_s2(codemie_home: Path, model: str) -> int:
     try:
         rewrap = _run(
             [
-                "uv", "run", "ws-rewrap",
-                "--src", str(codemie_home),
-                "--out", str(scratch),
-                "--container-hostname", _CONTAINER_HOSTNAME,
-                "--container-arch", _docker_arch(),
+                "uv",
+                "run",
+                "ws-rewrap",
+                "--src",
+                str(codemie_home),
+                "--out",
+                str(scratch),
+                "--container-hostname",
+                _CONTAINER_HOSTNAME,
+                "--container-arch",
+                _docker_arch(),
             ],
             cwd=_REPO_ROOT,
         )
         if rewrap.returncode != 0:
             return rewrap.returncode
         args = _common_run_args("s2", model) + [
-            "--hostname", _CONTAINER_HOSTNAME,
-            "-v", f"{scratch}:/home/node/.codemie",
+            "--hostname",
+            _CONTAINER_HOSTNAME,
+            "-v",
+            f"{scratch}:/home/node/.codemie",
             _IMAGE,
         ]
         return _run(args).returncode
@@ -115,7 +134,9 @@ def main(argv: list[str] | None = None) -> int:
     if {"s1", "s2"} & set(selected):
         config = args.codemie_home / "codemie-cli.config.json"
         if not config.is_file():
-            print(f"missing {config} — run `codemie profile login` first", file=sys.stderr)
+            print(
+                f"missing {config} — run `codemie profile login` first", file=sys.stderr
+            )
             return 2
 
     if not args.skip_build and not build_image():
@@ -132,7 +153,9 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"\n{'=' * 60}\n MATRIX\n{'=' * 60}")
     for strategy in selected:
-        verdict = "PASS" if results[strategy] == 0 else f"FAIL (exit {results[strategy]})"
+        verdict = (
+            "PASS" if results[strategy] == 0 else f"FAIL (exit {results[strategy]})"
+        )
         print(f"  {strategy}: {verdict}")
 
     return 0 if any(rc == 0 for rc in results.values()) else 1
