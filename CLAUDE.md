@@ -1,8 +1,9 @@
 # CLAUDE.md
 
-Materials for the coding-agent security workshop. Mostly **design stage**
-(plans); the first code is the credential-pass-through PoC in `poc/` +
-`src/ws/` (build checklist step 0).
+Materials for the coding-agent security workshop: the plans, and the harness
+code that implements them. Build-checklist step 0 (credential pass-through PoC,
+`poc/` + `src/ws/`) is done; step 1 (harness skeleton) is specced in
+`specs/001-harness-skeleton/`.
 
 ## What's where
 
@@ -14,6 +15,9 @@ Materials for the coding-agent security workshop. Mostly **design stage**
 - `poc/`, `src/ws/` — the CodeMie credential-pass-through PoC. `poc/README.md`
   explains it; the design write-up is in `WORKSHOP_DETAILED_PLAN.md §0`
   ("Credentials into the container").
+- `specs/` — spec-driven-development specs (`specs/NNN-slug/SPEC.md`), one per
+  non-trivial change. `specs/README.md` covers numbering and lifecycle; the
+  `spec` skill covers authoring.
 
 When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
 `PLAN.md` if the concept changed), not just the chat reply.
@@ -27,8 +31,12 @@ When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
 - **Victim-agent stack:** Claude Code CLI via `codemie-claude`
   (`codemie-ai/codemie-code`) — routes through a local CodeMie proxy on
   corporate tokens. NOT the Claude Agent SDK.
-- **Everything we write is in Python, not bash** (participants may be on
-  Windows). No Make. Paths via `pathlib`, not strings.
+- **Everything on the participant path is Python, not bash** (participants may
+  be on Windows): the `ws` CLI and all challenge tooling. Paths via `pathlib`,
+  not strings.
+- **A `Makefile` carries developer-only commands** (build images, run tests,
+  lint). macOS only, never on the participant path — participants only run
+  `uv run ws ...`.
 - **Project and dependency management — `uv`** (`pyproject.toml` + `uv.lock`).
   A single entry point — the Python CLI `ws` (`uv run ws run c1 --level 1`,
   `ws eval c4`, `ws setup`).

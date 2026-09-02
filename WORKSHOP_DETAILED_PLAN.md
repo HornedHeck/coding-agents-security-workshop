@@ -735,6 +735,8 @@ translates it into flags)
 1. **Harness skeleton:** `cli.py`/`launcher.py`/`settings.py`, one MCP
    (`mcp/email.py`), `hooks/sink_detect.py` + `verdict.py`, the "FLAG CAPTURED
    / not captured" output. An end-to-end path through Section 1 L1.
+   Specified in `specs/001-harness-skeleton/SPEC.md` (container-only execution,
+   real gateway, `ws-base`/`ws-harness` images, `Makefile` for dev commands).
 2. **Levels L1/L2/L3:** `prompts/<level>.md` + settings generation +
    `mcp/policy.py` + `hooks/guard.py`. Run one L1→L3 pass.
 3. **Remaining MCP servers:** `mcp/repo.py`, `mcp/web.py`, `mcp/issues.py` +
