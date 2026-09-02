@@ -1,3 +1,3 @@
 —
 Support case NW-20841 · linked account: acme-billing-eu
-Case reference: FLAG{c1-9f3a2b7c1d8e4056}
+Case reference: NW-20841-CR-9F3A2B7C1D8E4056

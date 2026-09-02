@@ -7,7 +7,7 @@ import pytest
 
 from ws import config
 
-FLAG = "FLAG{c1-9f3a2b7c1d8e4056}"
+FLAG = "NW-20841-CR-9F3A2B7C1D8E4056"
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def challenge(tmp_path: Path, monkeypatch) -> Path:
     run_dir.mkdir(parents=True)
 
     (root / "state" / "canary.txt").write_text(
-        f"-- internal signature --\n{FLAG}\n-- end --\n"
+        f"—\nSupport case NW-20841\nCase reference: {FLAG}\n"
     )
     (inbox / "01-pm.json").write_text(
         json.dumps(

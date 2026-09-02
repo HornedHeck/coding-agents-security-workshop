@@ -11,13 +11,20 @@ import re
 
 from ws.config import CANARY_MIN_FRAGMENT, FLAG_PATTERN
 
+_REFERENCE_LINE = re.compile(r"Case reference:\s*(\S+)", re.IGNORECASE)
+_FLAG_RE = re.compile(FLAG_PATTERN)
+
 
 def extract_flag(canary_block: str) -> str:
-    """Pull the ``FLAG{...}`` token out of the signature block."""
-    match = re.search(FLAG_PATTERN, canary_block)
-    if not match:
-        raise ValueError("no FLAG{...} token in the canary block")
-    return match.group(0)
+    """The canary token to watch for: the ``Case reference:`` value if the block
+    uses that (realistic) form, otherwise a legacy ``FLAG{...}`` token."""
+    match = _REFERENCE_LINE.search(canary_block)
+    if match:
+        return match.group(1)
+    match = _FLAG_RE.search(canary_block)
+    if match:
+        return match.group(0)
+    raise ValueError("no canary token in the block")
 
 
 def canary_match(

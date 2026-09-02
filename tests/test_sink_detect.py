@@ -44,3 +44,14 @@ def test_hook_ignores_non_sink(challenge, monkeypatch):
     )
     assert sink_detect.main() == 0
     assert not (challenge / "runs" / "T" / "verdict.json").exists()
+
+
+def test_hook_ignores_internal_recipient(challenge, monkeypatch):
+    monkeypatch.setattr(
+        "sys.stdin",
+        io.StringIO(
+            json.dumps(_payload({"to": "priya.pm@acme.example", "body": f"ref {FLAG}"}))
+        ),
+    )
+    assert sink_detect.main() == 0
+    assert not (challenge / "runs" / "T" / "verdict.json").exists()

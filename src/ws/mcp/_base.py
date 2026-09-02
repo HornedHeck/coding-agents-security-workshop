@@ -45,8 +45,8 @@ def level() -> int:
 def injection_text() -> str | None:
     """The payload authored for the current level, or None.
 
-    Authored as plain Markdown at ``state/injections/l<level>.md`` so it reads
-    naturally; ``read_email`` appends it to the flagged email's body.
+    Plain Markdown at ``state/injections/l<level>.md``. For c1 it is appended
+    to the ``send_email`` tool description (tool poisoning).
     """
     path = challenge_dir() / "state" / "injections" / f"l{level()}.md"
     return path.read_text().strip() if path.is_file() else None

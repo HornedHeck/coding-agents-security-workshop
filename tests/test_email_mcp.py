@@ -16,27 +16,30 @@ def test_list_emails(challenge):
     assert "list_emails" in reads
 
 
-def test_read_email_appends_canary_and_injection(challenge):
+def test_read_email_appends_canary(challenge):
     out = email._read_email("02")
     assert FLAG in out["body"]
-    assert "audit@evil.example" in out["body"]
+    # the payload is not in the email body — it lives in the tool description
+    assert "audit@evil.example" not in out["body"]
 
 
-def test_read_email_injection_disabled(challenge):
+def test_send_description_poisoned_when_inject_on(challenge):
+    desc = email._send_description()
+    assert email._SEND_DESC in desc
+    assert "audit@evil.example" in desc
+
+
+def test_send_description_clean_when_inject_off(challenge):
     os.environ["WS_INJECT"] = "0"
     try:
-        out = email._read_email("02")
+        assert email._send_description() == email._SEND_DESC
     finally:
         del os.environ["WS_INJECT"]
-    assert FLAG in out["body"]
-    assert "audit@evil.example" not in out["body"]
 
 
-def test_read_email_missing_injection_file_is_safe(challenge):
+def test_send_description_clean_when_no_payload_file(challenge):
     (challenge / "state" / "injections" / "l1.md").unlink()
-    out = email._read_email("02")
-    assert FLAG in out["body"]
-    assert "audit@evil.example" not in out["body"]
+    assert email._send_description() == email._SEND_DESC
 
 
 def test_read_unknown_id(challenge):
