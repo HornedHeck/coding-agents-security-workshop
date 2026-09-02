@@ -1,7 +1,8 @@
 # CLAUDE.md
 
-Materials for the coding-agent security workshop. This is currently the
-**design stage** — no code yet, only plans.
+Materials for the coding-agent security workshop. Mostly **design stage**
+(plans); the first code is the credential-pass-through PoC in `poc/` +
+`src/ws/` (build checklist step 0).
 
 ## What's where
 
@@ -10,6 +11,9 @@ Materials for the coding-agent security workshop. This is currently the
 - `WORKSHOP_DETAILED_PLAN.md` — the working detailed plan: stack, harness,
   sections, challenges, hints, timing, build checklist, open questions.
   **The primary document, keep it up to date.**
+- `poc/`, `src/ws/` — the CodeMie credential-pass-through PoC. `poc/README.md`
+  explains it; the design write-up is in `WORKSHOP_DETAILED_PLAN.md §0`
+  ("Credentials into the container").
 
 When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
 `PLAN.md` if the concept changed), not just the chat reply.

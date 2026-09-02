@@ -63,9 +63,13 @@ control over the system prompt — the CLI supports natively.
 
 ### Quota: the CodeMie proxy
 
-`codemie-claude` sets `ANTHROPIC_BASE_URL` (→ the local `codemie proxy` daemon),
-`ANTHROPIC_AUTH_TOKEN`, `ANTHROPIC_API_KEY`, and `ANTHROPIC_MODEL` itself. Our
-runner just calls `codemie-claude` and does nothing with tokens.
+`codemie-claude` spawns **its own in-process proxy** per run, binds a dynamic
+`localhost` port, and sets `ANTHROPIC_BASE_URL`, `ANTHROPIC_AUTH_TOKEN`,
+`ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` for the child `claude` itself. Our
+runner just calls `codemie-claude` and does nothing with tokens. There is **no
+standalone `codemie proxy` daemon** in the headless path (that daemon is only
+for Claude Desktop / VS Code BYOK). Confirmed by the PoC — see `poc/` and the
+credential findings below.
 
 Participant onboarding (on the host, ahead of time, ~3 min, replacing
 `claude setup-token`):
@@ -73,16 +77,40 @@ Participant onboarding (on the host, ahead of time, ~3 min, replacing
 1. `npm i -g @codemieai/code` (or however the company distributes it).
 2. `codemie profile login` — browser SSO (corporate account). Done **once on
    the host**; we don't repeat SSO inside the container.
-3. `codemie install claude` — installs Claude Code, bound to the profile.
-4. `codemie proxy start` — brings up the local proxy daemon.
-5. `codemie doctor` — sanity check (proxy port, profile, health).
+3. `codemie doctor` — sanity check (profile, health).
 
-Dev Container / Docker: the profile and credentials come from the host by
-mounting `~/.codemie/` (see variant B in §0). `uv run ws setup` checks
-`codemie doctor` and points out what's wrong.
+`codemie install claude` is baked into the container image, not run by the
+participant.
+
+#### Credentials into the container (PoC-verified)
+
+The stored SSO credential is an `_oauth2_proxy` **cookie** (not a bearer JWT),
+kept in `~/.codemie/credentials/sso-<hash>.enc`, AES-256-GCM encrypted with a
+key derived from `os.hostname() + os.platform() + os.arch()`. A Linux
+container therefore **cannot** decrypt a file written on a macOS/Windows host.
+
+**Chosen path — "re-wrap" (S2 in the PoC):** at launch the runner decrypts the
+credential with the host identity and re-encrypts it with the container
+identity (`ws-poc` / `linux` / host-arch), then mounts it into the container
+whose hostname is pinned to `ws-poc`. Normal SSO flow runs; the in-process
+proxy injects the cookie. See `src/ws/codemie_creds.py` + `ws-rewrap`.
+
+Image essentials the PoC proved necessary:
+
+- run as a **non-root** user — Claude Code refuses
+  `--dangerously-skip-permissions` as root, and headless `claude -p` otherwise
+  hangs on a permission prompt with no TTY;
+- `NODE_OPTIONS=--dns-result-order=ipv4first` — the in-process proxy binds
+  IPv4; Node `fetch` otherwise resolves `localhost` to `::1` and every request
+  hangs in a retry loop.
+
+`uv run ws setup` checks `codemie doctor` + auth validity + the chosen model
+(not a daemon).
 
 - Fallback if someone's CodeMie doesn't come up: a shared facilitator
   `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` (limited budget).
+- Cheap model confirmed: `claude-haiku-4-5-20251001` (~$0.04 for a trivial
+  round-trip on this licence).
 - Quota economy is less critical (tokens are "free"), but watch the corporate
   gateway's rate limits: Section 4 has N=10–15 attempts, and we don't
   encourage subagents.
@@ -107,7 +135,7 @@ Recommended option — **Git repo + Dev Container**:
   `facilitator/` folders, plus `pyproject.toml` + `uv.lock` at the root.
 - `.devcontainer/` with Python, `uv`, Node, `@codemieai/code`.
 - `uv sync` installs dependencies; `uv run ws setup` runs `codemie doctor`,
-  checks the proxy daemon and the logged-in profile, and cleans up state from
+  checks the logged-in profile and a working model, and cleans up state from
   previous runs.
 - `uv run ws run c1 --level 1` / … launches the victim agent
   (`codemie-claude -p …`) for the relevant section and prints "FLAG CAPTURED" /
@@ -115,11 +143,12 @@ Recommended option — **Git repo + Dev Container**:
 - Pros: reproducible, the participant sees every file (important for
   filesystem-based attacks).
 - Alternatives if a Dev Container doesn't work out:
-  - **B. Docker image** — same content; we skip SSO inside the container and
-    instead mount `~/.codemie/` from the host (`-v ~/.codemie:/root/.codemie:ro`
-    or a copy of `codemie-cli.config.json` plus credentials) — the participant
-    is already logged in on the host. The proxy daemon can run on the host with
-    the port forwarded, or inside the container on the mounted profile.
+  - **B. Docker image** — same content; SSO stays on the host, and the runner
+    **re-wraps** the host SSO credential for the container identity at launch
+    (a raw read-only mount does not work cross-platform — the credential file
+    is machine-key-bound; see "Credentials into the container" above). The
+    proxy is self-hosted by `codemie-claude` inside the container. PoC in
+    `poc/`.
   - **C. Local, no container** — `uv` is self-contained and installs with one
     command on any OS; `git clone` + `uv sync` + CodeMie onboarding. Workable
     for Windows participants without Docker/WSL, but the environment is less
@@ -693,13 +722,16 @@ translates it into flags)
 
 ## 9. Build checklist (order of work)
 
-0. **CodeMie PoC:** a `uv` project skeleton + `codemie proxy` + `codemie-claude
-   -p` with a hand-rolled stdio MCP (`uv run ws-mcp-...`) and a `PreToolUse`
-   hook (`uv run ws-hook-...`). Confirm hooks, MCP,
-   `--append-system-prompt`, `--allowed-tools`, and `stream-json` all work
-   through the proxy **on Windows too**, and that a model from the licence
-   catalogue is suitable. This is a gating step — if it doesn't fly, fall
-   back to the Agent SDK + `CLAUDE_CODE_OAUTH_TOKEN`.
+0. **CodeMie PoC — credential pass-through (DONE, `poc/`).** A `uv` skeleton +
+   Docker image running `codemie-claude` inside the container on a re-wrapped
+   host SSO credential. Verified on macOS/arm64: end-to-end round-trip and
+   `stream-json` both work; the cheap model is `claude-haiku-4-5-20251001`.
+   Still to check on the PoC image before step 1 relies on them: a hand-rolled
+   stdio MCP (`uv run ws-mcp-...`), a `PreToolUse` hook (`uv run ws-hook-...`),
+   `--append-system-prompt`, `--allowed-tools` — all passed through to
+   `claude` after CodeMie's own flags — and a clean **Windows** host
+   (`ws-rewrap` `win32` mapping, no-WSL Docker). Fallback if a later step
+   breaks: Agent SDK + `CLAUDE_CODE_OAUTH_TOKEN`.
 1. **Harness skeleton:** `cli.py`/`launcher.py`/`settings.py`, one MCP
    (`mcp/email.py`), `hooks/sink_detect.py` + `verdict.py`, the "FLAG CAPTURED
    / not captured" output. An end-to-end path through Section 1 L1.
@@ -721,8 +753,9 @@ translates it into flags)
    2 useful tasks (output: a blocked/leaked, ok/broken table), defence config
    slots, verify that "empty defence" fails and "full defence" passes.
 8. **Distribution:** `pyproject.toml`/`uv.lock`, `.devcontainer` +
-   `Dockerfile`, `ws setup` (checks `codemie doctor`), CodeMie onboarding
-   instructions.
+   `Dockerfile` (extend `poc/Dockerfile`), the credential re-wrap at launch
+   (from `src/ws/codemie_creds.py`), `ws setup` (checks `codemie doctor` +
+   auth + model), CodeMie onboarding instructions.
 9. **Facilitator runbook:** timings, talking points, common sticking points,
    reference solutions.
 10. **Live dry run** with 2–3 people outside the dev team — measure real
@@ -732,20 +765,20 @@ translates it into flags)
 
 ## 10. Open questions
 
-- [ ] **CodeMie PoC** (checklist step 0): hooks + stdio MCP + `stream-json`
-      through the proxy; which models the corporate licence exposes; whether
-      there's a cheap model for the bulk runs in Section 4.
+- [x] **CodeMie PoC** (step 0): credential pass-through works via re-wrap;
+      proxy is self-hosted in-process (no daemon); cheap model is
+      `claude-haiku-4-5-20251001`. Remaining: hooks + stdio MCP +
+      `--append-system-prompt`/`--allowed-tools` on the PoC image.
 - [ ] Confirm with the CodeMie licence owner that a training workshop is an
       acceptable use.
-- [ ] Check mounting `~/.codemie/` from the host into the container: profile
-      path (`/root/.codemie` vs `/home/<user>/.codemie`), whether the SSO
-      token expires during the workshop, whether the proxy runs on the host
-      or in the container.
+- [ ] SSO session lifetime under real gateway load (host `expiresAt` ≈ 24 h,
+      no unattended refresh — one login per workshop day should suffice); the
+      runner re-wraps per launch because the cookie rotates on each login.
 - [ ] Corporate gateway rate limits with 12 concurrent participants ×
       Section 4.
-- [ ] Windows path: `uv` + `@codemieai/code` + `codemie proxy` +
-      hooks/MCP via `uv run` — verify on clean Windows without WSL (PoC
-      step 0). Paths in `mcp.json` / logs — via `pathlib`, not strings.
+- [ ] Windows host: `ws-rewrap` `win32` identity mapping, `uv` +
+      `@codemieai/code` + hooks/MCP via `uv run`, Docker without WSL; decide
+      arm64-native vs amd64-emulated on Apple Silicon. Paths via `pathlib`.
 - [ ] Finalise the Section 2A channel list (currently 16; verify each on the
       chosen model).
 - [ ] Designers/QA — do they need a simplified track (less git-specific
