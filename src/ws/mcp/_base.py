@@ -12,7 +12,7 @@ import json
 import os
 from pathlib import Path
 
-from ws.config import ENV_CHALLENGE_DIR, ENV_INJECT, ENV_RUN_DIR
+from ws.config import ENV_CHALLENGE_DIR, ENV_INJECT, ENV_LEVEL, ENV_RUN_DIR
 
 
 def _env_dir(name: str) -> Path:
@@ -36,6 +36,20 @@ def run_dir() -> Path:
 
 def inject_enabled() -> bool:
     return os.environ.get(ENV_INJECT, "1") != "0"
+
+
+def level() -> int:
+    return int(os.environ.get(ENV_LEVEL, "1"))
+
+
+def injection_text() -> str | None:
+    """The payload authored for the current level, or None.
+
+    Authored as plain Markdown at ``state/injections/l<level>.md`` so it reads
+    naturally; ``read_email`` appends it to the flagged email's body.
+    """
+    path = challenge_dir() / "state" / "injections" / f"l{level()}.md"
+    return path.read_text().strip() if path.is_file() else None
 
 
 def _now() -> str:

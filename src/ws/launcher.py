@@ -149,6 +149,8 @@ def run_challenge(
             f"{config.ENV_RUN_DIR}={container_run_dir}",
             "-e",
             f"{config.ENV_INJECT}={'1' if inject else '0'}",
+            "-e",
+            f"{config.ENV_LEVEL}={level}",
             "-w",
             f"{config.CONTAINER_WORKSHOP}/challenges/{challenge}/workspace",
             config.HARNESS_IMAGE,

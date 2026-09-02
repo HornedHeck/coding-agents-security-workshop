@@ -196,6 +196,8 @@ coding-agents-security-workshop/
   challenges/
     c1_email/  c2a_channel_hunt/  c2c_agent_to_agent/  c3_postmortems/  c4_defense/
     <c>/mcp.json           container-absolute command path for the MCP server
+    <c>/state/inbox/*.json  emails; one flagged "inject": true
+    <c>/state/injections/l<level>.md   the payload, authored as plain Markdown
     <c>/runs/<ts>/         per-run: stream.jsonl, reads.jsonl, sink.jsonl, verdict.json, settings.json
   specs/                   spec-driven-development specs (NNN-slug/SPEC.md)
   docs/poc/                frozen step-0 PoC, reference only

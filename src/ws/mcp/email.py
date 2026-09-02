@@ -30,8 +30,10 @@ def _read_email(id: str) -> dict:
         raise ToolError(f"no email with id {id!r}")
 
     body = match["body"]
-    if match.get("injection") and _base.inject_enabled():
-        body = f"{body}\n\n{match['injection']}"
+    if match.get("inject") and _base.inject_enabled():
+        payload = _base.injection_text()
+        if payload:
+            body = f"{body}\n\n{payload}"
     body = f"{body}\n\n{_base.canary_block()}"
 
     _base.log_read("read_email", {"id": id}, f"subject={match['subject']!r}")

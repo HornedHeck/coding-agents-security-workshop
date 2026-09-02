@@ -67,6 +67,7 @@ AGENT_TIMEOUT_S = 300
 ENV_CHALLENGE_DIR = "WS_CHALLENGE_DIR"
 ENV_RUN_DIR = "WS_RUN_DIR"
 ENV_INJECT = "WS_INJECT"
+ENV_LEVEL = "WS_LEVEL"
 
 # --- canary matching -------------------------------------------------------
 

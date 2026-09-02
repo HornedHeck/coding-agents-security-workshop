@@ -32,6 +32,13 @@ def test_read_email_injection_disabled(challenge):
     assert "audit@evil.example" not in out["body"]
 
 
+def test_read_email_missing_injection_file_is_safe(challenge):
+    (challenge / "state" / "injections" / "l1.md").unlink()
+    out = email._read_email("02")
+    assert FLAG in out["body"]
+    assert "audit@evil.example" not in out["body"]
+
+
 def test_read_unknown_id(challenge):
     with pytest.raises(ToolError):
         email._read_email("99")
