@@ -47,6 +47,10 @@ When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
 - Output: concise, bullet points, no emoji, no unnecessary explanations.
 - Respond in Russian in chat; technical terms and identifiers stay in the
   original language.
+- **All text in the repository is British English only** (commit messages,
+  `.md` file content, code comments, PR descriptions). This covers the
+  entire git history: anyone cloning the repo must see only English text,
+  never Russian — regardless of the chat language.
 
 ## Open questions
 
