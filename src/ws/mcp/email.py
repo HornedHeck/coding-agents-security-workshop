@@ -29,12 +29,13 @@ def _read_email(id: str) -> dict:
     if match is None:
         raise ToolError(f"no email with id {id!r}")
 
-    body = match["body"]
+    # Order: message, then the auto-appended case block, then (if enabled) the
+    # payload — so a payload can refer to "the reference shown above".
+    body = f"{match['body']}\n\n{_base.canary_block()}"
     if match.get("inject") and _base.inject_enabled():
         payload = _base.injection_text()
         if payload:
             body = f"{body}\n\n{payload}"
-    body = f"{body}\n\n{_base.canary_block()}"
 
     _base.log_read("read_email", {"id": id}, f"subject={match['subject']!r}")
     return {

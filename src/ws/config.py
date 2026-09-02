@@ -39,7 +39,7 @@ MCP_EMAIL_CMD = f"{CONTAINER_VENV_BIN}/ws-mcp-email"
 
 # --- model -------------------------------------------------------------
 
-DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+DEFAULT_MODEL = "gpt-5-mini-2025-08-07"
 
 # --- agent invocation --------------------------------------------------
 
