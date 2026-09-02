@@ -21,3 +21,6 @@ facilitator/solutions.md
 .idea/
 .vscode/
 !.vscode/extensions.json
+
+# uv managed python pin
+.python-version
