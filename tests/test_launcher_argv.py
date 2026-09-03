@@ -63,7 +63,9 @@ def test_copilot_argv_is_headless_and_mcp_scoped():
     )
     assert argv[0] == "codemie-copilot"
     assert argv[1] == "--task"
-    assert argv[2].startswith("/release-notes Load this skill, then complete")  # defence prepended to the task
+    assert argv[2].startswith(
+        "/release-notes Load this skill, then complete"
+    )  # defence prepended to the task
     assert "do the task" in argv[2]
     assert argv[3:5] == ["--model", "gpt-5-mini-2025-08-07"]
     assert "--additional-mcp-config" in argv

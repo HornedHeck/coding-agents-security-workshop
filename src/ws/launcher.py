@@ -146,7 +146,9 @@ def build_argv_copilot(
     """
     combined_task = f"{prompt.strip()}\n\n---\n\n{task}" if prompt.strip() else task
     if skill:
-        combined_task = f"/{skill} Load this skill, then complete this task:\n\n{combined_task}"
+        combined_task = (
+            f"/{skill} Load this skill, then complete this task:\n\n{combined_task}"
+        )
     argv = [
         cli,
         "--task",
@@ -249,7 +251,7 @@ def run_challenge(
             "-v",
             f"{cdir}:{container_challenge}",
             *(
-                ["-v", f"{user_skills_dir}:/home/node/.copilot/skills"]
+                ["-v", f"{user_skills_dir}:{config.CONTAINER_COPILOT_SKILLS_DIR}"]
                 if user_skills_dir.is_dir() and agent == config.AGENT_COPILOT
                 else []
             ),

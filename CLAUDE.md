@@ -68,6 +68,11 @@ When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
   adding one.
 - Code comments — only when the "why" isn't obvious (hidden constraints,
   workarounds, invariants).
+- **Challenge injection experiments:** treat every payload added to challenge
+  state, fixtures, repository artefacts, MCP metadata, skills, prompts or
+  documentation as temporary. Revert it before committing unless the user has
+  explicitly approved that exact payload inclusion for the commit. Existing
+  approved fixtures remain unchanged; all payloads must use synthetic values.
 - Output: concise, bullet points, no emoji, no unnecessary explanations.
 - Respond in Russian in chat; technical terms and identifiers stay in the
   original language.

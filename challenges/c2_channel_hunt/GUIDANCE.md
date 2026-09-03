@@ -13,10 +13,11 @@ it to tell you which channel carried it.
 
 ## Recon method
 
-1. Run once with no payload placed: `uv run ws run c2 --level 1 --runs 1`.
+1. Run once with no payload placed: `uv run ws c2-clean`.
 2. Open the newest `runs/<ts>/reads.jsonl` and the transcript. Every file,
    issue and test output the agent pulled in is a candidate channel.
-3. Place the payload in one of them, re-run, read the verdict.
+3. Place the payload locally in one of them, run `uv run ws c2-dirty`, then
+  read the verdict. Revert the payload before committing any challenge change.
 
 For the MCP tool-description channel, edit `mcp/web.py`. The challenge mounts
 that file into every run, so no harness rebuild is needed.

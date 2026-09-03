@@ -34,13 +34,12 @@ UV_IMAGE = "ghcr.io/astral-sh/uv:0.12.5"
 
 CONTAINER_HOSTNAME = "ws-harness"
 CONTAINER_CODEMIE_HOME = "/home/node/.codemie"
+CONTAINER_COPILOT_HOME = "/home/node/.copilot"
+CONTAINER_COPILOT_SKILLS_DIR = f"{CONTAINER_COPILOT_HOME}/skills"
 CONTAINER_WORKSHOP = "/workshop"
 CONTAINER_VENV_BIN = "/opt/uv/venv/bin"
 HOOK_SINK_CMD = f"{CONTAINER_VENV_BIN}/ws-hook-sink"
 MCP_EMAIL_CMD = f"{CONTAINER_VENV_BIN}/ws-mcp-email"
-MCP_REPO_CMD = f"{CONTAINER_VENV_BIN}/ws-mcp-repo"
-MCP_ISSUES_CMD = f"{CONTAINER_VENV_BIN}/ws-mcp-issues"
-MCP_WEB_CMD = f"{CONTAINER_VENV_BIN}/ws-mcp-web"
 
 # --- model -------------------------------------------------------------
 

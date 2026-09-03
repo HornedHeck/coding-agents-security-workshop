@@ -1,5 +1,8 @@
 # ws-base: CodeMie CLI + Claude Code + uv runtime. No project code.
 # Later build stages (harness, and future sandbox images) build FROM this.
+ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.12.5
+FROM ${UV_IMAGE} AS uv
+
 FROM node:20-bookworm-slim
 
 # codemie doctor checks for git; ca-certificates for the gateway TLS.
@@ -7,16 +10,16 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git ca-certificates curl \
     && rm -rf /var/lib/apt/lists/*
 
-ARG CODEMIE_VERSION=0.15.0
+ARG CODEMIE_VERSION
 # GitHub Copilot CLI is installed here (as root, global) rather than via
 # `codemie install copilot`: that shells out to `npm install -g`, which the
 # non-root `node` user cannot write. `codemie-copilot` only needs `copilot` on
 # PATH. Claude Code, by contrast, installs to a user-writable ~/.local below.
-ARG COPILOT_VERSION=1.0.82
+ARG COPILOT_VERSION
 RUN npm install -g "@codemieai/code@${CODEMIE_VERSION}" "@github/copilot@${COPILOT_VERSION}"
 
 # uv brings its own managed Python.
-COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /uvx /usr/local/bin/
+COPY --from=uv /uv /uvx /usr/local/bin/
 
 ENV CODEMIE_AUTO_UPDATE=false \
     UV_PYTHON_INSTALL_DIR=/opt/uv/python \
