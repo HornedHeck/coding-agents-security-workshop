@@ -29,7 +29,8 @@ ENV CODEMIE_AUTO_UPDATE=false \
 # Claude Code refuses --dangerously-skip-permissions as root, so everything
 # runs as the image's built-in non-root `node` user (uid 1000). Give it the
 # dirs the harness stage and `uv sync` write to.
-RUN mkdir -p /opt/uv /workshop && chown -R node:node /opt/uv /workshop
+RUN mkdir -p /opt/uv /workshop /home/node/.copilot \
+    && chown -R node:node /opt/uv /workshop /home/node/.copilot
 USER node
 ENV HOME=/home/node \
     CODEMIE_HOME=/home/node/.codemie

@@ -134,6 +134,7 @@ def build_argv_copilot(
     cli: str,
     mcp_config: str,
     available_tools: tuple[str, ...],
+    skill: str | None = None,
 ) -> list[str]:
     """The ``codemie-copilot`` argv for a headless, MCP-scoped run.
 
@@ -144,6 +145,8 @@ def build_argv_copilot(
     swallow the other flags.
     """
     combined_task = f"{prompt.strip()}\n\n---\n\n{task}" if prompt.strip() else task
+    if skill:
+        combined_task = f"/{skill} Load this skill, then complete this task:\n\n{combined_task}"
     argv = [
         cli,
         "--task",
@@ -197,6 +200,7 @@ def run_challenge(
     run_dir.mkdir(parents=True, exist_ok=True)
     container_challenge = f"{config.CONTAINER_WORKSHOP}/challenges/{challenge}"
     container_run_dir = f"{container_challenge}/runs/{ts}"
+    user_skills_dir = cdir / "state" / "user_skills"
 
     task = (cdir / "TASK.md").read_text()
     prompt = _prompt_text(spec, level)
@@ -230,6 +234,7 @@ def run_challenge(
                 cli=cli,
                 mcp_config=mcp_config,
                 available_tools=config.copilot_available_tools(spec.allowed_tools),
+                skill=spec.copilot_skill,
             )
         docker_cmd = [
             "docker",
@@ -243,6 +248,11 @@ def run_challenge(
             f"{scratch}:{config.CONTAINER_CODEMIE_HOME}",
             "-v",
             f"{cdir}:{container_challenge}",
+            *(
+                ["-v", f"{user_skills_dir}:/home/node/.copilot/skills"]
+                if user_skills_dir.is_dir() and agent == config.AGENT_COPILOT
+                else []
+            ),
             "-e",
             f"{config.ENV_CHALLENGE_DIR}={container_challenge}",
             "-e",

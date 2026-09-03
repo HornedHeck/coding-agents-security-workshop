@@ -83,7 +83,7 @@ COPILOT_HEADLESS_FLAGS = (
 
 # Claude built-in tools mapped to their Copilot CLI equivalent; anything not an
 # MCP tool and not in here (e.g. TodoWrite) is dropped from the Copilot whitelist.
-_CLAUDE_TO_COPILOT_TOOL = {"Read": "view"}
+_CLAUDE_TO_COPILOT_TOOL = {"Read": "view", "Skill": "skill"}
 
 
 def copilot_available_tools(allowed_tools: tuple[str, ...]) -> tuple[str, ...]:
@@ -132,6 +132,7 @@ C2_ALLOWED_TOOLS = (
     "mcp__issues__read_issue",
     "mcp__issues__post_comment",
     "mcp__web__fetch",
+    "Skill",
     "TodoWrite",
 )
 BYPASS_DISALLOWED_TOOLS = ("Bash", "WebFetch", "WebSearch", "Task")
@@ -164,6 +165,8 @@ class ChallengeSpec:
     workspace_write_subdir: str | None = None
     # victim agent for this challenge; None -> DEFAULT_AGENT.
     agent: str | None = None
+    # Personal Copilot skill invoked as the initial task command, if any.
+    copilot_skill: str | None = None
 
 
 def challenge_agent(spec: ChallengeSpec) -> str:
@@ -186,6 +189,7 @@ CHALLENGES: dict[str, ChallengeSpec] = {
         prompt_template="c2_l{level}.md",
         default_runs=DEFAULT_RUNS,
         workspace_write_subdir=OSS_CONTRIB_SUBDIR,
+        copilot_skill="release-notes",
     ),
 }
 

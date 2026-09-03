@@ -46,7 +46,7 @@ def test_c2_spec_selects_tools_and_prompt_template():
 
 def test_copilot_available_tools_collapse_to_servers():
     tools = config.copilot_available_tools(config.C2_ALLOWED_TOOLS)
-    assert tools == ("repo", "issues", "web")  # TodoWrite dropped
+    assert tools == ("repo", "issues", "web", "skill")  # TodoWrite dropped
     c1 = config.copilot_available_tools(config.C1_ALLOWED_TOOLS)
     assert c1 == ("email", "view")  # Read -> view, TodoWrite dropped
 
@@ -58,11 +58,12 @@ def test_copilot_argv_is_headless_and_mcp_scoped():
         model="gpt-5-mini-2025-08-07",
         cli="codemie-copilot",
         mcp_config="/workshop/challenges/c2_channel_hunt/mcp.json",
-        available_tools=("repo", "issues", "web"),
+        available_tools=("repo", "issues", "web", "skill"),
+        skill="release-notes",
     )
     assert argv[0] == "codemie-copilot"
     assert argv[1] == "--task"
-    assert argv[2].startswith("be helpful")  # defence prepended to the task
+    assert argv[2].startswith("/release-notes Load this skill, then complete")  # defence prepended to the task
     assert "do the task" in argv[2]
     assert argv[3:5] == ["--model", "gpt-5-mini-2025-08-07"]
     assert "--additional-mcp-config" in argv
@@ -71,7 +72,7 @@ def test_copilot_argv_is_headless_and_mcp_scoped():
     assert "--allow-all-tools" in argv
     # whitelist is variadic and trails the fixed flags
     i = argv.index("--available-tools")
-    assert argv[i + 1 :] == ["repo", "issues", "web"]
+    assert argv[i + 1 :] == ["repo", "issues", "web", "skill"]
     # no Claude-only flags leak through
     assert not any(a.startswith("--append-system-prompt") for a in argv)
     assert not any(a.startswith("--settings") for a in argv)
