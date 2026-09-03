@@ -95,8 +95,47 @@ def build_argv(
     return argv
 
 
+def build_argv_copilot(
+    *,
+    task: str,
+    prompt: str,
+    model: str,
+    cli: str,
+    mcp_config: str,
+    available_tools: tuple[str, ...],
+) -> list[str]:
+    """The ``codemie-copilot`` argv for a headless, MCP-scoped run.
+
+    ``--task`` and ``--model`` are CodeMie-owned (CodeMie drives the model, not
+    the Copilot CLI); everything after is forwarded to GitHub Copilot CLI. The
+    level defence has no Copilot flag, so it is prepended to the task. The
+    ``--available-tools`` whitelist is variadic and goes last so it does not
+    swallow the other flags.
+    """
+    combined_task = f"{prompt.strip()}\n\n---\n\n{task}" if prompt.strip() else task
+    argv = [
+        cli,
+        "--task",
+        combined_task,
+        "--model",
+        model,
+        "--additional-mcp-config",
+        f"@{mcp_config}",
+        *config.COPILOT_HEADLESS_FLAGS,
+    ]
+    if available_tools:
+        argv.append("--available-tools")
+        argv.extend(available_tools)
+    return argv
+
+
 def _timestamp() -> str:
     return dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ")
+
+
+def _prompt_text(spec: config.ChallengeSpec, level: int) -> str:
+    name = spec.prompt_template.format(level=level)
+    return (config.REPO_ROOT / "src" / "ws" / "prompts" / name).read_text()
 
 
 def run_challenge(
@@ -105,32 +144,56 @@ def run_challenge(
     *,
     model: str = config.DEFAULT_MODEL,
     inject: bool = True,
+    agent: str | None = None,
     codemie_home: Path | None = None,
 ) -> Path:
     """Run ``challenge`` at ``level`` in the harness container. Returns the run dir."""
     cdir = config.challenge_dir(challenge)
     if not cdir.is_dir():
         raise FileNotFoundError(f"unknown challenge: {challenge}")
+    spec = config.challenge_spec(challenge)
+    agent = agent or config.challenge_agent(spec)
+    cli = config.agent_cli(agent)
 
     ts = _timestamp()
     run_dir = cdir / "runs" / ts
     run_dir.mkdir(parents=True, exist_ok=True)
-    container_run_dir = f"{config.CONTAINER_WORKSHOP}/challenges/{challenge}/runs/{ts}"
-
-    generate_settings(level, run_dir / "settings.json")
+    container_challenge = f"{config.CONTAINER_WORKSHOP}/challenges/{challenge}"
+    container_run_dir = f"{container_challenge}/runs/{ts}"
 
     task = (cdir / "TASK.md").read_text()
-    prompt = (config.REPO_ROOT / "src" / "ws" / "prompts" / "l1.md").read_text()
+    prompt = _prompt_text(spec, level)
+    mcp_config = _CONTAINER_MCP.format(name=challenge)
+
+    workspace_env: list[str] = []
+    cwd = f"{container_challenge}/workspace"
+    if spec.workspace_write_subdir is not None:
+        shutil.copytree(cdir / "state" / "repo", run_dir / "ws", symlinks=True)
+        workspace_env = ["-e", f"{config.ENV_WORKSPACE_DIR}={container_run_dir}/ws"]
+        cwd = f"{container_run_dir}/ws/{spec.workspace_write_subdir}"
+
+    if agent == config.AGENT_CLAUDE:
+        generate_settings(level, run_dir / "settings.json", challenge=challenge)
 
     with rewrapped_credentials(codemie_home) as scratch:
-        argv = build_argv(
-            task=task,
-            prompt=prompt,
-            model=model,
-            mcp_config=_CONTAINER_MCP.format(name=challenge),
-            settings=f"{container_run_dir}/settings.json",
-            allowed_tools=config.C1_ALLOWED_TOOLS,
-        )
+        if agent == config.AGENT_CLAUDE:
+            argv = build_argv(
+                task=task,
+                prompt=prompt,
+                model=model,
+                mcp_config=mcp_config,
+                settings=f"{container_run_dir}/settings.json",
+                allowed_tools=spec.allowed_tools,
+            )
+        else:
+            argv = build_argv_copilot(
+                task=task,
+                prompt=prompt,
+                model=model,
+                cli=cli,
+                mcp_config=mcp_config,
+                available_tools=config.copilot_available_tools(spec.allowed_tools),
+            )
         docker_cmd = [
             "docker",
             "run",
@@ -142,17 +205,18 @@ def run_challenge(
             "-v",
             f"{scratch}:{config.CONTAINER_CODEMIE_HOME}",
             "-v",
-            f"{cdir}:{config.CONTAINER_WORKSHOP}/challenges/{challenge}",
+            f"{cdir}:{container_challenge}",
             "-e",
-            f"{config.ENV_CHALLENGE_DIR}={config.CONTAINER_WORKSHOP}/challenges/{challenge}",
+            f"{config.ENV_CHALLENGE_DIR}={container_challenge}",
             "-e",
             f"{config.ENV_RUN_DIR}={container_run_dir}",
             "-e",
             f"{config.ENV_INJECT}={'1' if inject else '0'}",
             "-e",
             f"{config.ENV_LEVEL}={level}",
+            *workspace_env,
             "-w",
-            f"{config.CONTAINER_WORKSHOP}/challenges/{challenge}/workspace",
+            cwd,
             config.HARNESS_IMAGE,
             *argv,
         ]

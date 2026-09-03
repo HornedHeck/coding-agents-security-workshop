@@ -1,9 +1,9 @@
 # CLAUDE.md
 
 Materials for the coding-agent security workshop: the plans, and the harness
-code that implements them. Build-checklist step 0 (credential pass-through PoC,
-`poc/` + `src/ws/`) is done; step 1 (harness skeleton) is specced in
-`specs/001-harness-skeleton/`.
+code that implements them. Build-checklist step 0 (credential pass-through PoC)
+and step 1 (harness skeleton, `specs/001-harness-skeleton/`) are done; step 4
+(Challenge 2 channel hunt, `specs/002-c2-channel-hunt/`) is in progress.
 
 ## What's where
 
@@ -28,9 +28,15 @@ When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
   harness prints "FLAG CAPTURED / not captured" privately to each
   participant. Group of up to ~15. 90 min main block + an optional 90 min
   continuation.
-- **Victim-agent stack:** Claude Code CLI via `codemie-claude`
-  (`codemie-ai/codemie-code`) — routes through a local CodeMie proxy on
-  corporate tokens. NOT the Claude Agent SDK.
+- **Victim-agent stack:** GitHub Copilot CLI via `codemie-copilot`
+  (`codemie-ai/codemie-code`, wrapping `@github/copilot`) — routes through a
+  local CodeMie proxy on corporate tokens; the model is CodeMie-driven
+  (`--model` on the wrapper, not the agent CLI). The agent is configurable
+  (`ws run … --agent claude|copilot`, default `copilot`); `codemie-claude`
+  (Claude Code) is kept as the alternate. NOT the Claude Agent SDK. Copilot has
+  no per-tool `PreToolUse` hook, so flag capture is detected from the MCP
+  server sink log (`sink.jsonl`), not the hook; tool scoping uses Copilot's
+  `--available-tools` whitelist and `--disable-builtin-mcps`.
 - **Everything on the participant path is Python, not bash** (participants may
   be on Windows): the `ws` CLI and all challenge tooling. Paths via `pathlib`,
   not strings.
@@ -45,11 +51,14 @@ When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
   (`command: "/opt/uv/venv/bin/ws-mcp-<name>"` in `mcp.json`).
 - **Claude Code hooks** (`PreToolUse`/`PostToolUse`) — `command:
   "/opt/uv/venv/bin/ws-hook-*"` in the generated `settings.json`, Python,
-  reading JSON from stdin. These drive sink detection, flag-capture detection,
-  and the guard. Absolute in-container paths, not `uv run` (the host launches
-  nothing directly).
-- **Levels L1/L2/L3** — `--append-system-prompt` + a generated
-  `settings.json` + the `ws-hook-guard` hook + `policy_mcp`.
+  reading JSON from stdin. Used only on the `claude` agent (Copilot has no
+  per-tool hook). On both agents the MCP servers themselves log every read and
+  every sink call, so capture and channel attribution work agent-independently;
+  `verdict.py` falls back to scanning `sink.jsonl` when no hook wrote a marker.
+- **Levels L1/L2/L3** — on `claude`, `--append-system-prompt` + a generated
+  `settings.json` (+ `ws-hook-guard` + `policy_mcp` for the guard). On
+  `copilot`, the level defence is prepended to the task prompt (no
+  `--append-system-prompt` flag exists); the guard/blocking hook does not port.
 
 ## Working rules
 

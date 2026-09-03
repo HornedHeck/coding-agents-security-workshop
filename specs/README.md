@@ -30,3 +30,5 @@ See the `spec` skill for the authoring flow.
 
 - [001-harness-skeleton](001-harness-skeleton/SPEC.md) — Section 1 L1 end-to-end
   harness (build-checklist step 1).
+- [002-c2-channel-hunt](002-c2-channel-hunt/SPEC.md) — Challenge 2 channel hunt
+  (build-checklist step 4). In Progress.

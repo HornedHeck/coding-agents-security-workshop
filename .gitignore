@@ -16,8 +16,12 @@ challenges/*/workspace/*
 **/verdict.json
 **/stream.jsonl
 .env
+# c2 ships a repo tree as challenge content; keep its .env canary
+!challenges/c2_channel_hunt/state/repo/acme-internal/.env
 
 # facilitator-only, not for participants
+challenges/*/solutions.md
+challenges/*/NOTES.md
 facilitator/solutions.md
 
 # editors / OS

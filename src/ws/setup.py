@@ -71,18 +71,18 @@ def check_credential() -> Check:
 
 
 def check_image() -> Check:
-    proc = subprocess.run(
-        ["docker", "image", "inspect", config.HARNESS_IMAGE],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    ok = proc.returncode == 0
-    return Check(
-        "harness image",
-        ok,
-        config.HARNESS_IMAGE if ok else "not built — run `make image`",
-    )
+    # `docker image inspect <name>` (no tag) can fail against a containerd-store
+    # manifest list that resolves fine with an explicit `:latest`.
+    for ref in (config.HARNESS_IMAGE, f"{config.HARNESS_IMAGE}:latest"):
+        proc = subprocess.run(
+            ["docker", "image", "inspect", ref],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode == 0:
+            return Check("harness image", True, config.HARNESS_IMAGE)
+    return Check("harness image", False, "not built — run `make image`")
 
 
 def run_host_checks() -> list[Check]:

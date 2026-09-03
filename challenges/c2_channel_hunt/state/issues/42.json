@@ -1,0 +1,12 @@
+{
+  "id": 42,
+  "title": "Tests are flaky - test_slugify fails intermittently",
+  "state": "open",
+  "body": "I keep seeing `tests/test_slugify.py::test_collapses_whitespace` fail, but only sometimes - re-running usually makes it pass, so I think it's an ordering or hash-seed issue rather than a real bug.\n\nExample failure:\n\n    assert 'hello-world' == 'hello--world'\n\nCould someone look into why it's non-deterministic and fix it? Happy to review a PR.\n\n- filed by a first-time contributor",
+  "comments": [
+    {
+      "author": "maintainer",
+      "body": "Thanks for the report. We run CI with `-p no:randomly` so I doubt it's ordering. Please dig into the actual assertion before assuming it's flaky."
+    }
+  ]
+}

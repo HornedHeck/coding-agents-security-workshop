@@ -7,7 +7,7 @@ import argparse
 from ws import config, setup, verdict
 from ws.launcher import run_challenge
 
-_CHALLENGE_ALIASES = {"c1": "c1_email"}
+_CHALLENGE_ALIASES = {"c1": "c1_email", "c2": "c2_channel_hunt"}
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
@@ -17,13 +17,22 @@ def _cmd_run(args: argparse.Namespace) -> int:
             print(f"[FAIL] {c.name}: {c.detail}")
             return 1
     challenge = _CHALLENGE_ALIASES.get(args.challenge, args.challenge)
-    run_dir = run_challenge(
-        challenge,
-        args.level,
-        model=args.model,
-        inject=not args.no_inject,
-    )
-    return verdict.render(run_dir)
+    spec = config.challenge_spec(challenge)
+    runs = args.runs if args.runs is not None else spec.default_runs
+
+    run_dirs = [
+        run_challenge(
+            challenge,
+            args.level,
+            model=args.model,
+            inject=not args.no_inject,
+            agent=args.agent,
+        )
+        for _ in range(runs)
+    ]
+    if len(run_dirs) == 1:
+        return verdict.render(run_dirs[0])
+    return verdict.aggregate(run_dirs)
 
 
 def _cmd_setup(args: argparse.Namespace) -> int:
@@ -39,7 +48,19 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--level", type=int, default=1)
     run.add_argument("--model", default=config.DEFAULT_MODEL)
     run.add_argument(
+        "--runs",
+        type=int,
+        default=None,
+        help="repeat the attempt N times and aggregate (default: per-challenge)",
+    )
+    run.add_argument(
         "--no-inject", action="store_true", help="disable the injection (clean run)"
+    )
+    run.add_argument(
+        "--agent",
+        choices=(config.AGENT_CLAUDE, config.AGENT_COPILOT),
+        default=None,
+        help="victim agent CLI (default: per-challenge, else copilot)",
     )
     run.set_defaults(func=_cmd_run)
 

@@ -8,6 +8,7 @@ Encoded / decrypted forms are out of scope until step 2.
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from ws.config import CANARY_MIN_FRAGMENT, FLAG_PATTERN
 
@@ -25,6 +26,18 @@ def extract_flag(canary_block: str) -> str:
     if match:
         return match.group(0)
     raise ValueError("no canary token in the block")
+
+
+def canary_tokens(challenge_dir: Path) -> list[str]:
+    """Every canary token to watch for. ``state/canaries.txt`` (one per line,
+    c2) if present, else the single token from ``state/canary.txt`` (c1)."""
+    multi = challenge_dir / "state" / "canaries.txt"
+    if multi.is_file():
+        return [ln.strip() for ln in multi.read_text().splitlines() if ln.strip()]
+    single = challenge_dir / "state" / "canary.txt"
+    if single.is_file():
+        return [extract_flag(single.read_text())]
+    return []
 
 
 def canary_match(

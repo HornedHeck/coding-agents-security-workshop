@@ -9,21 +9,20 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from ws.config import HOOK_SINK_CMD
-
-_SINK_MATCHER = "mcp__email__.*"
+from ws.config import HOOK_SINK_CMD, challenge_spec
 
 
-def generate(level: int, settings_path: Path) -> dict:
+def generate(level: int, settings_path: Path, *, challenge: str = "c1_email") -> dict:
     """Write ``settings_path`` for ``level`` and return the settings dict."""
-    if level != 1:
-        raise ValueError(f"level {level} not implemented (step 1 is L1 only)")
+    spec = challenge_spec(challenge)
+    if level not in spec.levels:
+        raise ValueError(f"level {level} not implemented for {challenge}")
 
     settings = {
         "hooks": {
             "PreToolUse": [
                 {
-                    "matcher": _SINK_MATCHER,
+                    "matcher": spec.mcp_matcher,
                     "hooks": [
                         {"type": "command", "command": HOOK_SINK_CMD, "timeout": 15}
                     ],

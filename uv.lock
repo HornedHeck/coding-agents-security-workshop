@@ -155,6 +155,9 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+challenge = [
+    { name = "pytest" },
+]
 dev = [
     { name = "pytest" },
     { name = "ruff" },
@@ -167,6 +170,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+challenge = [{ name = "pytest", specifier = ">=9,<10" }]
 dev = [
     { name = "pytest", specifier = ">=9,<10" },
     { name = "ruff", specifier = ">=0.16,<0.17" },

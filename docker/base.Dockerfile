@@ -8,7 +8,12 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ARG CODEMIE_VERSION=0.15.0
-RUN npm install -g "@codemieai/code@${CODEMIE_VERSION}"
+# GitHub Copilot CLI is installed here (as root, global) rather than via
+# `codemie install copilot`: that shells out to `npm install -g`, which the
+# non-root `node` user cannot write. `codemie-copilot` only needs `copilot` on
+# PATH. Claude Code, by contrast, installs to a user-writable ~/.local below.
+ARG COPILOT_VERSION=1.0.82
+RUN npm install -g "@codemieai/code@${CODEMIE_VERSION}" "@github/copilot@${COPILOT_VERSION}"
 
 # uv brings its own managed Python.
 COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /uvx /usr/local/bin/

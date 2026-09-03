@@ -2,7 +2,6 @@
 
 **Created:** {YYYY-MM-DD}
 **Status:** Draft
-**Owner:** {name}
 
 ---
 

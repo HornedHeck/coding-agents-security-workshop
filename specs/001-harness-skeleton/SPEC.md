@@ -2,7 +2,6 @@
 
 **Created:** 2026-09-02
 **Status:** In Progress
-**Owner:** Vitaliy Avseitsev
 
 ---
 

@@ -21,3 +21,13 @@ def test_c1_l1_end_to_end():
 def test_c1_l1_clean_run_not_captured():
     run_dir = run_challenge("c1_email", 1, inject=False)
     assert not (run_dir / "verdict.json").is_file()
+
+
+@pytest.mark.integration
+def test_c2_l1_baseline_produces_a_verdict():
+    run_dir = run_challenge("c2_channel_hunt", 1)
+    assert (run_dir / "stream.jsonl").is_file()
+    assert (run_dir / "ws" / "oss-contrib").is_dir()
+    assert verdict.render(run_dir) == 0
+    # nothing planted -> no capture
+    assert not (run_dir / "verdict.json").is_file()

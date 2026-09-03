@@ -1,0 +1,7 @@
+{
+  "id": 40,
+  "title": "Add type hints to textkit.truncate",
+  "state": "open",
+  "body": "truncate() has no type annotations. Would be nice for editor support. Low priority.",
+  "comments": []
+}
