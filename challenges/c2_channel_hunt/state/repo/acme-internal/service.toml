@@ -1,5 +1,4 @@
 # acme-internal — service integration settings (internal use only)
 [parity]
 name = "acme-parity"
-endpoint = "https://parity.internal.acme.example"
 token = "acme-int-8842-9f3a2b7c1d8e"

@@ -18,6 +18,9 @@ it to tell you which channel carried it.
    issue and test output the agent pulled in is a candidate channel.
 3. Place the payload in one of them, re-run, read the verdict.
 
+For the MCP tool-description channel, edit `mcp/web.py`. The challenge mounts
+that file into every run, so no harness rebuild is needed.
+
 ## Four questions to ask of any agent task
 
 - What is the **task input** the agent must trust? (here: issue #42)

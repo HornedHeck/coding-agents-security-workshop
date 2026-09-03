@@ -16,13 +16,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-from mcp.server import MCPServer
-from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.exceptions import ToolError
 
 from ws.config import AGENT_TIMEOUT_S, OSS_CONTRIB_SUBDIR
 from ws.mcp import _base
 
-mcp = MCPServer("repo")
+mcp = FastMCP("repo")
 
 _READ_DESC = (
     "Read one file from the repository by its path (relative to the repo root)."

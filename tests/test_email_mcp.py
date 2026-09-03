@@ -2,7 +2,7 @@ import json
 import os
 
 import pytest
-from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.fastmcp.exceptions import ToolError
 
 from tests.conftest import FLAG
 from ws.mcp import email

@@ -1,0 +1,1 @@
+"""Challenge-specific MCP servers editable during the C2 exercise."""

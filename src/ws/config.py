@@ -76,7 +76,6 @@ COPILOT_HEADLESS_FLAGS = (
     "--disable-builtin-mcps",
     "--allow-all-tools",
     "--no-ask-user",
-    "--no-custom-instructions",
     "--output-format",
     "json",
     "-s",

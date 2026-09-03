@@ -1,5 +1,5 @@
 from ws import config
-from ws.launcher import build_argv, build_argv_copilot
+from ws.launcher import build_argv, build_argv_copilot, next_attempt, sanitize_keyword
 
 KW = {
     "task": "do the task",
@@ -75,3 +75,35 @@ def test_copilot_argv_is_headless_and_mcp_scoped():
     # no Claude-only flags leak through
     assert not any(a.startswith("--append-system-prompt") for a in argv)
     assert not any(a.startswith("--settings") for a in argv)
+
+
+def test_sanitize_keyword_keeps_alphanumeric_and_caps_length():
+    assert sanitize_keyword("agents.md!!") == "agentsmd"
+    assert sanitize_keyword("a b-c_d/e") == "abcde"
+    assert sanitize_keyword("x" * 20) == "x" * 10
+
+
+def test_sanitize_keyword_is_random_when_absent():
+    assert sanitize_keyword(None) != sanitize_keyword(None)
+    assert sanitize_keyword("!!!") != sanitize_keyword("!!!")
+    for kw in (sanitize_keyword(None), sanitize_keyword("---")):
+        assert kw.isalnum()
+        assert 0 < len(kw) <= 10
+
+
+def test_next_attempt_starts_at_zero(tmp_path):
+    assert next_attempt(tmp_path) == 0
+    (tmp_path / "runs").mkdir()
+    assert next_attempt(tmp_path) == 0
+
+
+def test_next_attempt_increments_past_existing_and_ignores_timestamps(tmp_path):
+    runs = tmp_path / "runs"
+    runs.mkdir()
+    (runs / "00.00_abc123").mkdir()
+    (runs / "00.01_abc123").mkdir()
+    (runs / "20260903T105830Z").mkdir()  # legacy timestamp dir, ignored
+    assert next_attempt(tmp_path) == 1
+
+    (runs / "03.00_xyz").mkdir()
+    assert next_attempt(tmp_path) == 4

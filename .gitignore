@@ -22,6 +22,7 @@ challenges/*/workspace/*
 # facilitator-only, not for participants
 challenges/*/solutions.md
 challenges/*/NOTES.md
+challenges/*/verified_channels.md
 facilitator/solutions.md
 
 # editors / OS

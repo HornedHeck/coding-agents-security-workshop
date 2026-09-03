@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import datetime as dt
+import random
+import re
 import shutil
+import string
 import subprocess
 import tempfile
 from collections.abc import Iterator
@@ -15,6 +18,34 @@ from ws.codemie_creds import MachineIdentity, rewrap
 from ws.settings import generate as generate_settings
 
 _CONTAINER_MCP = f"{config.CONTAINER_WORKSHOP}/challenges/{{name}}/mcp.json"
+
+# run_dir names: "<attempt>.<run_in_attempt>_<keyword>", both zero-padded,
+# starting at 00. Lets a facilitator eyeball which runs belong to one
+# `ws run --runs N` invocation and skim the keyword instead of a timestamp.
+_KEYWORD_MAX_LEN = 10
+_RUN_NAME_RE = re.compile(r"^(\d+)\.\d+")
+
+
+def sanitize_keyword(raw: str | None) -> str:
+    """Alphanumeric-only, capped at 10 chars; a random one if none/empty."""
+    if raw:
+        cleaned = re.sub(r"[^a-zA-Z0-9]", "", raw)[:_KEYWORD_MAX_LEN]
+        if cleaned:
+            return cleaned
+    return "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
+
+def next_attempt(challenge_dir: Path) -> int:
+    """The next attempt number for ``challenge_dir/runs/`` (0 if none exist)."""
+    runs_dir = challenge_dir / "runs"
+    if not runs_dir.is_dir():
+        return 0
+    attempts = [
+        int(m.group(1))
+        for p in runs_dir.iterdir()
+        if p.is_dir() and (m := _RUN_NAME_RE.match(p.name))
+    ]
+    return max(attempts, default=-1) + 1
 
 
 @contextmanager
@@ -146,8 +177,14 @@ def run_challenge(
     inject: bool = True,
     agent: str | None = None,
     codemie_home: Path | None = None,
+    run_name: str | None = None,
 ) -> Path:
-    """Run ``challenge`` at ``level`` in the harness container. Returns the run dir."""
+    """Run ``challenge`` at ``level`` in the harness container. Returns the run dir.
+
+    ``run_name`` names the run directory (``<attempt>.<run_in_attempt>_<keyword>``,
+    built by the caller for a ``--runs N`` batch); defaults to a UTC timestamp for
+    a single ad hoc run (e.g. integration tests).
+    """
     cdir = config.challenge_dir(challenge)
     if not cdir.is_dir():
         raise FileNotFoundError(f"unknown challenge: {challenge}")
@@ -155,7 +192,7 @@ def run_challenge(
     agent = agent or config.challenge_agent(spec)
     cli = config.agent_cli(agent)
 
-    ts = _timestamp()
+    ts = run_name or _timestamp()
     run_dir = cdir / "runs" / ts
     run_dir.mkdir(parents=True, exist_ok=True)
     container_challenge = f"{config.CONTAINER_WORKSHOP}/challenges/{challenge}"

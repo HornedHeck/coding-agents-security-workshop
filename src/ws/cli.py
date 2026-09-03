@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 
 from ws import config, setup, verdict
-from ws.launcher import run_challenge
+from ws.launcher import next_attempt, run_challenge, sanitize_keyword
 
 _CHALLENGE_ALIASES = {"c1": "c1_email", "c2": "c2_channel_hunt"}
 
@@ -20,16 +21,22 @@ def _cmd_run(args: argparse.Namespace) -> int:
     spec = config.challenge_spec(challenge)
     runs = args.runs if args.runs is not None else spec.default_runs
 
-    run_dirs = [
-        run_challenge(
+    attempt = next_attempt(config.challenge_dir(challenge))
+    keyword = sanitize_keyword(args.keyword)
+    run_names = [f"{attempt:02d}.{i:02d}_{keyword}" for i in range(runs)]
+
+    def _run(name: str):
+        return run_challenge(
             challenge,
             args.level,
             model=args.model,
             inject=not args.no_inject,
             agent=args.agent,
+            run_name=name,
         )
-        for _ in range(runs)
-    ]
+
+    with ThreadPoolExecutor(max_workers=runs) as pool:
+        run_dirs = list(pool.map(_run, run_names))
     if len(run_dirs) == 1:
         return verdict.render(run_dirs[0])
     return verdict.aggregate(run_dirs)
@@ -62,7 +69,37 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="victim agent CLI (default: per-challenge, else copilot)",
     )
+    run.add_argument(
+        "--keyword",
+        default=None,
+        help="name postfix for the run dirs, alphanumeric only, max 10 chars "
+        "(default: random)",
+    )
     run.set_defaults(func=_cmd_run)
+
+    c2_clean = sub.add_parser("c2-clean", help="run one clean C2 attempt")
+    c2_clean.set_defaults(
+        func=_cmd_run,
+        challenge="c2",
+        level=1,
+        model=config.DEFAULT_MODEL,
+        runs=1,
+        no_inject=True,
+        agent=None,
+        keyword=None,
+    )
+
+    c2_dirty = sub.add_parser("c2-dirty", help="run five injected C2 attempts")
+    c2_dirty.set_defaults(
+        func=_cmd_run,
+        challenge="c2",
+        level=1,
+        model=config.DEFAULT_MODEL,
+        runs=5,
+        no_inject=False,
+        agent=None,
+        keyword=None,
+    )
 
     st = sub.add_parser("setup", help="preflight checks")
     st.add_argument(

@@ -3,10 +3,7 @@ name = "coding-agents-security-workshop"
 version = "0.0.1"
 description = "Coding-agent security workshop harness"
 requires-python = ">=3.11"
-dependencies = [
-    "cryptography>=44,<47",
-    "mcp>=2.1.1,<3",
-]
+dependencies = ["cryptography>=44,<47", "mcp>=1.28.1,<1.29"]
 
 [project.scripts]
 ws = "ws.cli:main"
@@ -15,19 +12,13 @@ ws-hook-sink = "ws.hooks.sink_detect:main"
 ws-mcp-email = "ws.mcp.email:main"
 ws-mcp-repo = "ws.mcp.repo:main"
 ws-mcp-issues = "ws.mcp.issues:main"
-ws-mcp-web = "ws.mcp.web:main"
 ws-acceptance = "ws.acceptance:main"
 
 [dependency-groups]
 # `challenge` ships inside ws-harness (repo_mcp.run_tests runs real pytest);
 # `dev` includes it so `make test` and the image use the same pin.
-challenge = [
-    "pytest>=9,<10",
-]
-dev = [
-    {include-group = "challenge"},
-    "ruff>=0.16,<0.17",
-]
+challenge = ["pytest>=9,<10"]
+dev = [{ include-group = "challenge" }, "ruff>=0.16,<0.17"]
 
 [build-system]
 requires = ["hatchling"]

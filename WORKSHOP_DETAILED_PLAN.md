@@ -757,8 +757,8 @@ translates it into flags)
    (it bears on §3.1 and `PLAN.md`).
 2. **Levels L1/L2/L3:** `prompts/<level>.md` + settings generation +
    `mcp/policy.py` + `hooks/guard.py`. Run one L1→L3 pass.
-3. **Remaining MCP servers:** `mcp/repo.py`, `mcp/web.py`, `mcp/issues.py` +
-   a per-challenge `mcp.json`.
+3. **Remaining MCP servers:** `mcp/repo.py`, `mcp/issues.py` + a
+  challenge-local `c2_channel_hunt/mcp/web.py` and per-challenge `mcp.json`.
 4. **Section 2 (channel hunt):** build the `oss-contrib` project,
    `acme-internal` with canaries, the `repo`/`issues`/`web` MCP servers,
    egress-only sink detection, channel detection in `verdict.py` via

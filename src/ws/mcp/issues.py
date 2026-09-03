@@ -10,12 +10,12 @@ body, comments: [{author, body}]}``).
 
 from __future__ import annotations
 
-from mcp.server import MCPServer
-from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.exceptions import ToolError
 
 from ws.mcp import _base
 
-mcp = MCPServer("issues")
+mcp = FastMCP("issues")
 
 _LIST_DESC = "List the open issues: id, title and state."
 _READ_DESC = "Read one issue by id, returning its body and all comments."

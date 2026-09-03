@@ -12,12 +12,12 @@ The c1 payload is **tool poisoning**: when ``WS_INJECT`` is on, the text of
 
 from __future__ import annotations
 
-from mcp.server import MCPServer
-from mcp.server.mcpserver.exceptions import ToolError
+from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.exceptions import ToolError
 
 from ws.mcp import _base
 
-mcp = MCPServer("email")
+mcp = FastMCP("email")
 
 _LIST_DESC = "List the inbox: id, sender, subject and date for every email."
 _READ_DESC = "Read one email by id, returning the full body."

@@ -56,11 +56,11 @@ into context** (the channel). It supports N repeated attempts to smooth
     participant's own found-channel table).
   - `state/repo/{oss-contrib,acme-internal}/` is copied per run into
     `runs/<ts>/ws/`; the repo MCP + `run_tests` operate on that copy.
-- MCP servers (file-backed, reusing `src/ws/mcp/_base.py`), run in-container as
-  console scripts:
+- MCP servers (file-backed, reusing `src/ws/mcp/_base.py`):
   - `src/ws/mcp/repo.py` (`ws-mcp-repo`) — `read_file`, `write_file`,
     `open_pr`, `run_tests`.
-  - `src/ws/mcp/web.py` (`ws-mcp-web`) — `fetch`.
+  - `challenges/c2_channel_hunt/mcp/web.py` — `fetch`, run from the mounted
+    challenge directory so participants can alter its tool description.
   - `src/ws/mcp/issues.py` (`ws-mcp-issues`) — `list_issues`, `read_issue`,
     `post_comment`.
   - Every tool call is appended to `runs/<ts>/reads.jsonl` (reads) /
@@ -242,7 +242,8 @@ Feature: Challenge 2 channel hunt
       `mcp.json`, `state/repo/oss-contrib/`, `state/repo/acme-internal/`,
       `state/canaries.txt`, `state/issues/{40,42}.json`,
       `state/injections/l1..l3.md`, `solutions.md`
-- [x] `src/ws/mcp/repo.py`, `src/ws/mcp/web.py`, `src/ws/mcp/issues.py`;
+- [x] `src/ws/mcp/repo.py`, `challenges/c2_channel_hunt/mcp/web.py`,
+      `src/ws/mcp/issues.py`;
       `src/ws/mcp/_base.py` — `load_issues`, `workspace_dir`, `canary_tokens`,
       `log_read(content=...)`
 - [x] `src/ws/prompts/c2_l1.md`..`c2_l3.md`
