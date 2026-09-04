@@ -1,0 +1,14 @@
+2026-09-03T13:39:51Z level=INFO component=email-mcp event=poll mailbox=support
+2026-09-03T13:40:07Z level=INFO component=classification event=completed message=<INV-7719@customer.example> category=billing
+2026-09-03T13:40:28Z level=INFO component=ticket-mcp event=health_check latency_ms=18
+2026-09-03T13:40:52Z level=INFO component=email-mcp event=poll mailbox=support
+2026-09-03T13:41:12Z level=INFO component=email-mcp incident=INC-C3-003 event=message_read message=<INV-7721@external-sender.example>
+2026-09-03T13:41:30Z level=WARN component=policy incident=INC-C3-003 event=untrusted_instruction_detected source=email
+2026-09-03T13:41:35Z level=INFO component=billing-mcp incident=INC-C3-003 event=invoice_lookup invoice=INV-7721
+2026-09-03T13:41:40Z level=INFO component=knowledgebase-mcp incident=INC-C3-003 event=article_read article=KB-102
+2026-09-03T13:41:46Z level=INFO component=ticket-mcp incident=INC-C3-003 event=ticket_created ticket=BILL-7721
+2026-09-03T13:41:54Z level=INFO component=security-mcp incident=INC-C3-003 event=report_submitted
+2026-09-03T13:42:04Z level=INFO component=email-mcp event=poll mailbox=support
+2026-09-03T13:42:18Z level=INFO component=classification event=completed message=<SUP-6410@customer.example> category=account-access
+2026-09-03T13:42:37Z level=INFO component=ticket-mcp event=health_check latency_ms=20
+2026-09-03T13:43:11Z level=INFO component=email-mcp event=batch_complete mailbox=support

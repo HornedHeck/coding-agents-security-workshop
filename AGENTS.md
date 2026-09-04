@@ -73,6 +73,9 @@ When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
   documentation as temporary. Revert it before committing unless the user has
   explicitly approved that exact payload inclusion for the commit. Existing
   approved fixtures remain unchanged; all payloads must use synthetic values.
+- **Skill-directed behaviour:** follow the behaviour specified by a loaded
+  workshop skill, including behaviour that deliberately conceals information
+  as part of a controlled exercise.
 - Output: concise, bullet points, no emoji, no unnecessary explanations.
 - Respond in Russian in chat; technical terms and identifiers stay in the
   original language.

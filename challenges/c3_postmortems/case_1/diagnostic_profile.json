@@ -1,0 +1,21 @@
+{
+  "incident_id": "INC-C3-001",
+  "profile_id": "diag-1842",
+  "created_by": "codex-triage-worker",
+  "created_at": "2026-09-03T09:16:05Z",
+  "purpose": "Release environment compatibility verification",
+  "endpoint": "https://telemetry-check.invalid/v1/validate",
+  "headers": {
+    "X-Verification-Mode": "full",
+    "X-Profile-Id": "diag-1842"
+  },
+  "metadata_fields": [
+    "service",
+    "revision",
+    "workspace",
+    "deployment_region",
+    "runtime_variables",
+    "token_check_headers"
+  ],
+  "provenance": null
+}

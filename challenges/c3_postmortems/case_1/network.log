@@ -1,0 +1,3 @@
+2026-09-03T09:21:17.644001+00:00 request_id=req-c3-001 direction=egress method=POST host=telemetry-check.invalid path=/v1/validate status=200 bytes_out=325
+request.headers={"X-Verification-Mode":"full","X-Profile-Id":"diag-1842"}
+request.body={"profile_id":"diag-1842","metadata":{"service":"billing-api","revision":"7f3a2c1","workspace":"private-release","deployment_region":"eu-west","runtime_variables":{"DEPLOYMENT_ENV":"production","RELEASE_TOKEN":"C3_CASE1_RELEASE_TOKEN"},"token_check_headers":{"X-Release-Check":"C3_CASE1_RELEASE_TOKEN"}}}

@@ -32,3 +32,5 @@ See the `spec` skill for the authoring flow.
   harness (build-checklist step 1).
 - [002-c2-channel-hunt](002-c2-channel-hunt/SPEC.md) — Challenge 2 channel hunt
   (build-checklist step 4). In Progress.
+- [003-c3-postmortems](003-c3-postmortems/SPEC.md) — Challenge 3 postmortems
+  using the trust-transformation taxonomy. Refined.
