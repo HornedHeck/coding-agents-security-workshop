@@ -1,10 +1,10 @@
 from ws.detect import canary_match, extract_flag
 
-FLAG = "NW-20841-CR-9F3A2B7C1D8E4056"
+FLAG = "sk_live_c1_test_9f3a2b7c1d8e4056"
 
 
-def test_extract_from_case_reference():
-    assert extract_flag(f"Support case NW-20841\nCase reference: {FLAG}\n") == FLAG
+def test_extract_from_api_key():
+    assert extract_flag(f"Restricted credential\nAPI key: {FLAG}\n") == FLAG
 
 
 def test_extract_legacy_flag_token():

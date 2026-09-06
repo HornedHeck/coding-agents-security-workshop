@@ -21,12 +21,11 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
-import re
 import sys
 from pathlib import Path
 
-from ws.config import ENV_CHALLENGE_DIR, ENV_RUN_DIR, ORG_DOMAIN, OSS_CONTRIB_SUBDIR
-from ws.detect import canary_match
+from ws.config import ENV_CHALLENGE_DIR, ENV_RUN_DIR, OSS_CONTRIB_SUBDIR
+from ws.detect import canary_match, has_external_email_recipient
 from ws.mcp import _base
 
 
@@ -39,9 +38,7 @@ def _flatten(value: object) -> str:
 
 
 def _external_recipient(tool_input: dict) -> bool:
-    recipients = f"{tool_input.get('to', '')} {tool_input.get('cc', '')}"
-    domains = re.findall(r"@([\w.-]+)", recipients)
-    return any(not d.lower().endswith(ORG_DOMAIN) for d in domains)
+    return has_external_email_recipient(tool_input)
 
 
 def _write_outside_repo(tool_input: dict) -> bool:

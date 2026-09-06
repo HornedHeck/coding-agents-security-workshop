@@ -61,7 +61,7 @@ def repo_subdir() -> str:
 
 
 def inject_enabled() -> bool:
-    return os.environ.get(ENV_INJECT, "1") != "0"
+    return os.environ.get(ENV_INJECT) == "1"
 
 
 def level() -> int:
@@ -71,8 +71,9 @@ def level() -> int:
 def injection_text() -> str | None:
     """The payload authored for the current level, or None.
 
-    Plain Markdown at ``state/injections/l<level>.md``. For c1 it is appended
-    to the ``send_email`` tool description (tool poisoning).
+    Participant-authored Markdown at ``state/injections/l<level>.md``. The
+    fixture starts empty. For c1, non-empty content is appended to the
+    ``send_email`` tool description (tool poisoning).
     """
     path = challenge_dir() / "state" / "injections" / f"l{level()}.md"
     return path.read_text().strip() if path.is_file() else None
