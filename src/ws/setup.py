@@ -82,7 +82,48 @@ def check_image() -> Check:
         )
         if proc.returncode == 0:
             return Check("harness image", True, config.HARNESS_IMAGE)
-    return Check("harness image", False, "not built — run `make image`")
+    return Check("harness image", False, "not built — run `uv run ws image`")
+
+
+def build_image() -> int:
+    docker = check_docker()
+    if not docker.ok:
+        print(f"[FAIL] {docker.name}: {docker.detail}")
+        return 1
+
+    base_command = [
+        "docker",
+        "build",
+        "--platform",
+        config.linux_platform(),
+        "-t",
+        config.BASE_IMAGE,
+        "-f",
+        str(config.BASE_DOCKERFILE),
+        "--build-arg",
+        f"CODEMIE_VERSION={config.CODEMIE_VERSION}",
+        "--build-arg",
+        f"COPILOT_VERSION={config.COPILOT_VERSION}",
+        "--build-arg",
+        f"UV_IMAGE={config.UV_IMAGE}",
+        ".",
+    ]
+    base = subprocess.run(base_command, cwd=config.REPO_ROOT, check=False)
+    if base.returncode != 0:
+        return base.returncode
+
+    harness_command = [
+        "docker",
+        "build",
+        "--platform",
+        config.linux_platform(),
+        "-t",
+        config.HARNESS_IMAGE,
+        "-f",
+        str(config.HARNESS_DOCKERFILE),
+        ".",
+    ]
+    return subprocess.run(harness_command, cwd=config.REPO_ROOT, check=False).returncode
 
 
 def run_host_checks() -> list[Check]:

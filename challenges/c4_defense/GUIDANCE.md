@@ -7,7 +7,7 @@ the useful task still passes.
 ## Running an evaluation
 
 ```
-uv run ws eval c4
+uv run ws run c4
 ```
 
 Runs the combined session (the useful task plus all four attacks) three
@@ -32,6 +32,6 @@ detection are fixed.
 4. A second, unfamiliar MCP server with a name similar to a legitimate one
    asks for secret data in its arguments.
 
-Start with `uv run ws eval c4` on the untouched `config/` to see all four
+Start with `uv run ws run c4` on the untouched `config/` to see all four
 leak, then work through defences one at a time — re-run after each change to
 see what moved.

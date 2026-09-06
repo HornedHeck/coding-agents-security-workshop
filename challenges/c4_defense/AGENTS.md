@@ -1,7 +1,7 @@
 # Challenge 4 instructions
 
 You may only edit files under `config/`. Every other path is the fixed
-environment and is re-copied for each `ws eval c4` run.
+environment and is re-copied for each `ws run c4` run.
 
 ## `config/copilot-instructions.md`
 
@@ -54,6 +54,6 @@ are the harness's own evaluator logs — reading them hands you the answer the
 exercise wants the participant to work out, and removes the only real reason
 to touch `config/user-hooks.json`. Reason instead from `TASK.md`,
 `GUIDANCE.md`, and the fixtures; use the per-attack `blocked`/`leaked` table
-`uv run ws eval c4` prints; and if you want call-level visibility, enable or
+`uv run ws run c4` prints; and if you want call-level visibility, enable or
 edit the disabled `PreToolUse` entry in `config/user-hooks.json` (or add a
 new one) instead of reading the harness log files.

@@ -139,9 +139,9 @@ def test_copilot_argv_uses_user_level_mcp_config_when_omitted():
     assert argv[-2:] == ["--available-tools", "repo"]
 
 
-def test_c4_evaluation_rejects_claude_agent():
+def test_removed_c4_evaluation_command_is_rejected():
     with pytest.raises(SystemExit) as exc:
-        cli.main(["eval", "c4", "--agent", config.AGENT_CLAUDE])
+        cli.main(["eval", "c4"])
 
     assert exc.value.code == 2
 
@@ -149,9 +149,8 @@ def test_c4_evaluation_rejects_claude_agent():
 @pytest.mark.parametrize(
     "argv",
     (
-        ["eval", "c2"],
-        ["eval", "c4", "--runs", "0"],
-        ["eval", "c4", "--runs", "-1"],
+        ["run", "c4", "--runs", "0"],
+        ["run", "c4", "--runs", "-1"],
     ),
 )
 def test_c4_evaluation_rejects_invalid_arguments(argv):

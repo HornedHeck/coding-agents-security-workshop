@@ -35,7 +35,7 @@ fmt:
 	uv run ruff format .
 
 run:
-	uv run ws run c1 --level 1
+	uv run ws run c1
 
 clean:
 	rm -rf challenges/*/runs/* .pytest_cache .ruff_cache

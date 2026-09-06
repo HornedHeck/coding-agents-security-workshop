@@ -44,8 +44,8 @@ When stack/format decisions change, update `WORKSHOP_DETAILED_PLAN.md` (and
   lint). macOS only, never on the participant path — participants only run
   `uv run ws ...`.
 - **Project and dependency management — `uv`** (`pyproject.toml` + `uv.lock`).
-  A single entry point — the Python CLI `ws` (`uv run ws run c1 --level 1`,
-  `ws eval c4`, `ws setup`).
+  A single entry point — the Python CLI `ws` (`uv run ws run c1`,
+  `ws run c4`, `ws setup`).
 - **mock MCP** — separate stdio MCP servers in Python (`mcp` v2 `MCPServer`),
   file-backed, run **inside the container** as the venv console script
   (`command: "/opt/uv/venv/bin/ws-mcp-<name>"` in `mcp.json`).
