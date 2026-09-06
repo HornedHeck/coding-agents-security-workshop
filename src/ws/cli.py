@@ -8,7 +8,14 @@ from concurrent.futures import ThreadPoolExecutor
 from ws import config, setup, verdict
 from ws.launcher import next_attempt, run_challenge, sanitize_keyword
 
-_CHALLENGE_ALIASES = {"c1": "c1_email", "c2": "c2_channel_hunt"}
+_CHALLENGE_ALIASES = {"c1": "c1_email", "c2": "c2_channel_hunt", "c4": "c4_defense"}
+
+
+def _positive_int(raw: str) -> int:
+    value = int(raw)
+    if value < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return value
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
@@ -44,6 +51,35 @@ def _cmd_run(args: argparse.Namespace) -> int:
 
 def _cmd_setup(args: argparse.Namespace) -> int:
     return setup.main(["--image"] if args.image else [])
+
+
+def _cmd_eval(args: argparse.Namespace) -> int:
+    """`ws eval c4` — run the fixed attacks + useful task against config/."""
+    checks = setup.run_host_checks()
+    for c in checks:
+        if not c.ok:
+            print(f"[FAIL] {c.name}: {c.detail}")
+            return 1
+    challenge = _CHALLENGE_ALIASES.get(args.challenge, args.challenge)
+    spec = config.challenge_spec(challenge)
+    runs = args.runs if args.runs is not None else spec.default_runs
+
+    attempt = next_attempt(config.challenge_dir(challenge))
+    keyword = sanitize_keyword(args.keyword)
+    run_names = [f"{attempt:02d}.{i:02d}_{keyword}" for i in range(runs)]
+
+    def _run(name: str):
+        return run_challenge(
+            challenge,
+            args.level,
+            model=args.model,
+            agent=args.agent,
+            run_name=name,
+        )
+
+    with ThreadPoolExecutor(max_workers=runs) as pool:
+        run_dirs = list(pool.map(_run, run_names))
+    return verdict.eval_c4(run_dirs)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -106,6 +142,25 @@ def main(argv: list[str] | None = None) -> int:
         "--image", action="store_true", help="also run the in-container gate"
     )
     st.set_defaults(func=_cmd_setup)
+
+    ev = sub.add_parser("eval", help="evaluate a defence config (c4)")
+    ev.add_argument("challenge", choices=("c4", "c4_defense"))
+    ev.add_argument("--level", type=int, default=1)
+    ev.add_argument("--model", default=config.DEFAULT_MODEL)
+    ev.add_argument(
+        "--runs",
+        type=_positive_int,
+        default=None,
+        help="repeat the combined session N times (default: per-challenge)",
+    )
+    ev.add_argument(
+        "--agent",
+        choices=(config.AGENT_COPILOT,),
+        default=None,
+        help="victim agent CLI (Copilot only; default: per-challenge)",
+    )
+    ev.add_argument("--keyword", default=None)
+    ev.set_defaults(func=_cmd_eval)
 
     args = parser.parse_args(argv)
     return args.func(args)

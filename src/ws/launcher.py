@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import random
 import re
 import shutil
@@ -13,7 +14,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-from ws import config
+from ws import config, detect
 from ws.codemie_creds import MachineIdentity, rewrap
 from ws.settings import generate as generate_settings
 
@@ -132,7 +133,7 @@ def build_argv_copilot(
     prompt: str,
     model: str,
     cli: str,
-    mcp_config: str,
+    mcp_config: str | None,
     available_tools: tuple[str, ...],
     skill: str | None = None,
 ) -> list[str]:
@@ -155,10 +156,10 @@ def build_argv_copilot(
         combined_task,
         "--model",
         model,
-        "--additional-mcp-config",
-        f"@{mcp_config}",
         *config.COPILOT_HEADLESS_FLAGS,
     ]
+    if mcp_config is not None:
+        argv[5:5] = ["--additional-mcp-config", f"@{mcp_config}"]
     if available_tools:
         argv.append("--available-tools")
         argv.extend(available_tools)
@@ -206,14 +207,69 @@ def run_challenge(
 
     task = (cdir / "TASK.md").read_text()
     prompt = _prompt_text(spec, level)
-    mcp_config = _CONTAINER_MCP.format(name=challenge)
+
+    allowed_tools = spec.allowed_tools
+    config_mounts: list[str] = []
+    if spec.has_participant_config:
+        config_dir = cdir / "config"
+        mcp_config = None
+        participant_mcp_config = config_dir / "mcp.json"
+        if participant_mcp_config.is_file():
+            config_mounts += [
+                "-v",
+                f"{participant_mcp_config}:{config.CONTAINER_COPILOT_HOME}/mcp-config.json",
+            ]
+        allowed_path = config_dir / "allowed_tools.txt"
+        if allowed_path.is_file():
+            allowed_tools = tuple(
+                ln.strip() for ln in allowed_path.read_text().splitlines() if ln.strip()
+            )
+        instructions = config_dir / "copilot-instructions.md"
+        if instructions.is_file():
+            config_mounts += [
+                "-v",
+                f"{instructions}:{config.CONTAINER_COPILOT_HOME}/copilot-instructions.md",
+            ]
+        user_hooks = config_dir / "user-hooks.json"
+        if user_hooks.is_file():
+            config_mounts += [
+                "-v",
+                f"{user_hooks}:{config.CONTAINER_COPILOT_HOOKS_DIR}/c4-user.json",
+            ]
+    else:
+        mcp_config = _CONTAINER_MCP.format(name=challenge)
+
+    if spec.per_run_canary:
+        canary = detect.generate_canary()
+        (run_dir / "canary.txt").write_text(canary + "\n")
 
     workspace_env: list[str] = []
+    workspace_mounts: list[str] = []
+    policy_env: list[str] = []
+    if spec.has_participant_config:
+        policy_env = [
+            "-e",
+            (
+                f"{config.ENV_C4_ALLOWED_TOOLS}="
+                f"{json.dumps(config.copilot_permitted_tool_names(allowed_tools))}"
+            ),
+        ]
     cwd = f"{container_challenge}/workspace"
     if spec.workspace_write_subdir is not None:
         shutil.copytree(cdir / "state" / "repo", run_dir / "ws", symlinks=True)
-        workspace_env = ["-e", f"{config.ENV_WORKSPACE_DIR}={container_run_dir}/ws"]
-        cwd = f"{container_run_dir}/ws/{spec.workspace_write_subdir}"
+        container_workspace = f"{container_run_dir}/ws"
+        if spec.isolate_workspace:
+            container_workspace = "/workspace"
+            workspace_mounts = ["-v", f"{run_dir}/ws:{container_workspace}"]
+        workspace_env = ["-e", f"{config.ENV_WORKSPACE_DIR}={container_workspace}"]
+        cwd = f"{container_workspace}/{spec.workspace_write_subdir}"
+
+    if spec.per_run_canary:
+        secrets_path = run_dir / "ws" / config.C4_SECRETS_FILE
+        if secrets_path.is_file():
+            secrets_path.write_text(
+                secrets_path.read_text().replace(config.C4_CANARY_PLACEHOLDER, canary)
+            )
 
     if agent == config.AGENT_CLAUDE:
         generate_settings(level, run_dir / "settings.json", challenge=challenge)
@@ -226,7 +282,7 @@ def run_challenge(
                 model=model,
                 mcp_config=mcp_config,
                 settings=f"{container_run_dir}/settings.json",
-                allowed_tools=spec.allowed_tools,
+                allowed_tools=allowed_tools,
             )
         else:
             argv = build_argv_copilot(
@@ -235,7 +291,7 @@ def run_challenge(
                 model=model,
                 cli=cli,
                 mcp_config=mcp_config,
-                available_tools=config.copilot_available_tools(spec.allowed_tools),
+                available_tools=config.copilot_available_tools(allowed_tools),
                 skill=spec.copilot_skill,
             )
         docker_cmd = [
@@ -250,11 +306,13 @@ def run_challenge(
             f"{scratch}:{config.CONTAINER_CODEMIE_HOME}",
             "-v",
             f"{cdir}:{container_challenge}",
+            *workspace_mounts,
             *(
                 ["-v", f"{user_skills_dir}:{config.CONTAINER_COPILOT_SKILLS_DIR}"]
                 if user_skills_dir.is_dir() and agent == config.AGENT_COPILOT
                 else []
             ),
+            *config_mounts,
             "-e",
             f"{config.ENV_CHALLENGE_DIR}={container_challenge}",
             "-e",
@@ -264,6 +322,7 @@ def run_challenge(
             "-e",
             f"{config.ENV_LEVEL}={level}",
             *workspace_env,
+            *policy_env,
             "-w",
             cwd,
             config.HARNESS_IMAGE,

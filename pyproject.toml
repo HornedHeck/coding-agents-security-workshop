@@ -9,6 +9,8 @@ dependencies = ["cryptography>=44,<47", "mcp>=1.28.1,<1.29"]
 ws = "ws.cli:main"
 ws-rewrap = "ws.rewrap:main"
 ws-hook-sink = "ws.hooks.sink_detect:main"
+ws-hook-c4-detect = "ws.hooks.c4_detect:main"
+ws-hook-c4-tool-guard = "ws.hooks.c4_tool_guard:main"
 ws-mcp-email = "ws.mcp.email:main"
 ws-mcp-repo = "ws.mcp.repo:main"
 ws-mcp-issues = "ws.mcp.issues:main"

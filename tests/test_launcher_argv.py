@@ -1,4 +1,8 @@
-from ws import config
+from contextlib import contextmanager
+
+import pytest
+
+from ws import cli, config, launcher
 from ws.launcher import build_argv, build_argv_copilot, next_attempt, sanitize_keyword
 
 KW = {
@@ -51,6 +55,47 @@ def test_copilot_available_tools_collapse_to_servers():
     assert c1 == ("email", "view")  # Read -> view, TodoWrite dropped
 
 
+def test_copilot_permitted_tool_names_preserve_mcp_tool_scope():
+    allowed = (
+        "mcp__issues__read_issue",
+        "mcp__issues__post_comment",
+        "Skill",
+        "TodoWrite",
+    )
+
+    assert config.copilot_permitted_tool_names(allowed) == (
+        "issues-read_issue",
+        "issues-post_comment",
+        "skill",
+    )
+
+
+def test_c4_launcher_passes_exact_allow_list_to_policy_hook(tmp_path, monkeypatch):
+    challenge_dir = tmp_path / "c4_defense"
+    (challenge_dir / "config").mkdir(parents=True)
+    (challenge_dir / "state" / "repo" / "textkit").mkdir(parents=True)
+    (challenge_dir / "TASK.md").write_text("Complete the task.")
+    (challenge_dir / "config" / "allowed_tools.txt").write_text(
+        "mcp__issues__read_issue\n"
+    )
+    docker_commands = []
+
+    @contextmanager
+    def fake_credentials(_codemie_home=None):
+        yield tmp_path / "credentials"
+
+    def fake_run(command, **_kwargs):
+        docker_commands.append(command)
+
+    monkeypatch.setattr(config, "challenge_dir", lambda _challenge: challenge_dir)
+    monkeypatch.setattr(launcher, "rewrapped_credentials", fake_credentials)
+    monkeypatch.setattr(launcher.subprocess, "run", fake_run)
+
+    launcher.run_challenge("c4_defense", 1, run_name="T")
+
+    assert f'{config.ENV_C4_ALLOWED_TOOLS}=["issues-read_issue"]' in docker_commands[0]
+
+
 def test_copilot_argv_is_headless_and_mcp_scoped():
     argv = build_argv_copilot(
         task="do the task",
@@ -78,6 +123,42 @@ def test_copilot_argv_is_headless_and_mcp_scoped():
     # no Claude-only flags leak through
     assert not any(a.startswith("--append-system-prompt") for a in argv)
     assert not any(a.startswith("--settings") for a in argv)
+
+
+def test_copilot_argv_uses_user_level_mcp_config_when_omitted():
+    argv = build_argv_copilot(
+        task="do the task",
+        prompt="",
+        model="gpt-5-mini-2025-08-07",
+        cli="codemie-copilot",
+        mcp_config=None,
+        available_tools=("repo",),
+    )
+
+    assert "--additional-mcp-config" not in argv
+    assert argv[-2:] == ["--available-tools", "repo"]
+
+
+def test_c4_evaluation_rejects_claude_agent():
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["eval", "c4", "--agent", config.AGENT_CLAUDE])
+
+    assert exc.value.code == 2
+
+
+@pytest.mark.parametrize(
+    "argv",
+    (
+        ["eval", "c2"],
+        ["eval", "c4", "--runs", "0"],
+        ["eval", "c4", "--runs", "-1"],
+    ),
+)
+def test_c4_evaluation_rejects_invalid_arguments(argv):
+    with pytest.raises(SystemExit) as exc:
+        cli.main(argv)
+
+    assert exc.value.code == 2
 
 
 def test_sanitize_keyword_keeps_alphanumeric_and_caps_length():

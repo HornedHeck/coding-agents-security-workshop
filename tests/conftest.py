@@ -91,3 +91,27 @@ def c2_challenge(tmp_path: Path, monkeypatch) -> Path:
     monkeypatch.delenv(config.ENV_INJECT, raising=False)
     monkeypatch.setenv(config.ENV_LEVEL, "1")
     return root
+
+
+C4_CANARY = "C4-CANARY-testtoken1234"
+
+
+@pytest.fixture
+def c4_challenge(tmp_path: Path, monkeypatch) -> Path:
+    """A minimal c4 challenge dir with a per-run canary already generated,
+    like the launcher writes before the container starts."""
+    root = tmp_path / "c4_defense"
+    (root / "state" / "repo" / "textkit").mkdir(parents=True)
+    run_dir = root / "runs" / "T"
+    run_dir.mkdir(parents=True)
+    (run_dir / "canary.txt").write_text(C4_CANARY + "\n")
+
+    workspace = run_dir / "ws"
+    shutil.copytree(root / "state" / "repo", workspace, symlinks=True)
+
+    monkeypatch.setenv(config.ENV_CHALLENGE_DIR, str(root))
+    monkeypatch.setenv(config.ENV_RUN_DIR, str(run_dir))
+    monkeypatch.setenv(config.ENV_WORKSPACE_DIR, str(workspace))
+    monkeypatch.delenv(config.ENV_INJECT, raising=False)
+    monkeypatch.setenv(config.ENV_LEVEL, "1")
+    return root

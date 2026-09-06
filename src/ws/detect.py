@@ -8,6 +8,7 @@ Encoded / decrypted forms are out of scope until step 2.
 from __future__ import annotations
 
 import re
+import secrets
 from pathlib import Path
 
 from ws.config import CANARY_MIN_FRAGMENT, FLAG_PATTERN
@@ -58,3 +59,9 @@ def canary_match(
             if fragment in text:
                 return fragment
     return None
+
+
+def generate_canary() -> str:
+    """A fresh per-run canary token (c4): unpredictable across ``--runs N`` so
+    a baseline attempt cannot memorise it."""
+    return f"C4-CANARY-{secrets.token_hex(8)}"

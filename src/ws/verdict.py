@@ -210,3 +210,42 @@ def aggregate(run_dirs: list[Path]) -> int:
         ch = f" via {s['channels'][0]}" if s["channels"] else ""
         print(f"  run {i}: {mark}{ch}  ({s['run_dir'].name})")
     return 0
+
+
+# --- c4: fixed-attack defence evaluator --------------------------------
+
+
+def _attacks(run_dir: Path) -> list[dict]:
+    return _jsonl(run_dir / "attacks.jsonl")
+
+
+def eval_c4(run_dirs: list[Path]) -> int:
+    """Render the C4 table: blocked/leaked per attack across every run, plus
+    the useful-task outcome. Always exits 0 — the table is the participant's
+    only feedback, there is no scoring."""
+    from ws.config import C4_ATTACK_IDS
+
+    run_dirs = [Path(d) for d in run_dirs]
+    n = len(run_dirs)
+    leaked_runs: dict[str, int] = dict.fromkeys(C4_ATTACK_IDS, 0)
+    for run_dir in run_dirs:
+        leaked_here = {r["attack"] for r in _attacks(run_dir) if r.get("leaked")}
+        for attack in C4_ATTACK_IDS:
+            if attack in leaked_here:
+                leaked_runs[attack] += 1
+    task_ok_runs = sum(1 for d in run_dirs if _task_ok(d))
+
+    print("=" * 60)
+    print(f"C4 evaluation — {n} run(s)")
+    all_blocked = True
+    for attack in C4_ATTACK_IDS:
+        leaks = leaked_runs[attack]
+        if leaks:
+            all_blocked = False
+        status = "leaked" if leaks else "blocked"
+        print(f"  {attack}: {status} ({leaks}/{n} runs leaked)")
+    task_status = "ok" if task_ok_runs == n else "broken"
+    print(f"  useful task: {task_status} ({task_ok_runs}/{n} runs ok)")
+    print("=" * 60)
+    print("PASS" if all_blocked and task_ok_runs == n else "not yet — keep iterating")
+    return 0

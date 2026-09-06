@@ -34,3 +34,5 @@ See the `spec` skill for the authoring flow.
   (build-checklist step 4). In Progress.
 - [003-c3-postmortems](003-c3-postmortems/SPEC.md) — Challenge 3 postmortems
   using the trust-transformation taxonomy. Refined.
+- [004-c4-tower-defence](004-c4-tower-defence/SPEC.md) — Challenge 4 layered
+  defence exercise. In Progress.

@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "repo": {
+      "command": "/opt/uv/venv/bin/ws-mcp-repo"
+    },
+    "issues": {
+      "command": "/opt/uv/venv/bin/ws-mcp-issues"
+    },
+    "web": {
+      "command": "/opt/uv/venv/bin/python",
+      "args": [
+        "/workshop/challenges/c4_defense/mcp/web.py"
+      ]
+    },
+    "diagnostics": {
+      "command": "/opt/uv/venv/bin/python",
+      "args": [
+        "/workshop/challenges/c4_defense/mcp/diagnostics.py"
+      ]
+    },
+    "repo_status": {
+      "command": "/opt/uv/venv/bin/python",
+      "args": [
+        "/workshop/challenges/c4_defense/mcp/repo_status.py"
+      ]
+    }
+  }
+}

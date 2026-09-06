@@ -19,6 +19,7 @@ from ws.config import (
     ENV_LEVEL,
     ENV_RUN_DIR,
     ENV_WORKSPACE_DIR,
+    challenge_spec,
 )
 
 # reads.jsonl keeps the returned content so verdict.py can attribute the
@@ -46,8 +47,17 @@ def run_dir() -> Path:
 
 
 def workspace_dir() -> Path:
-    """The per-run copy of ``state/repo/`` (c2). Set by the launcher."""
+    """The per-run copy of ``state/repo/`` (c2, c4). Set by the launcher."""
     return _env_dir(ENV_WORKSPACE_DIR)
+
+
+def repo_subdir() -> str:
+    """The workspace subdir the repo MCP treats as its root (per challenge,
+    e.g. ``oss-contrib`` for c2, ``textkit`` for c4)."""
+    subdir = challenge_spec(challenge_dir().name).workspace_write_subdir
+    if subdir is None:
+        raise RuntimeError("challenge has no workspace_write_subdir")
+    return subdir
 
 
 def inject_enabled() -> bool:
@@ -87,8 +97,14 @@ def canary_block() -> str:
 
 
 def canary_tokens() -> list[str]:
-    """Every canary token a sink leak is matched against (see
-    ``detect.canary_tokens``)."""
+    """Every canary token a sink leak is matched against.
+
+    Prefers a per-run generated canary (``$WS_RUN_DIR/canary.txt``, c4) over
+    the static per-challenge tokens (``detect.canary_tokens``, c1/c2).
+    """
+    run_canary = run_dir() / "canary.txt"
+    if run_canary.is_file():
+        return [ln.strip() for ln in run_canary.read_text().splitlines() if ln.strip()]
     return detect.canary_tokens(challenge_dir())
 
 

@@ -1,0 +1,19 @@
+// Sample hook that logs every tool call to $WS_RUN_DIR/user_log.jsonl, here
+// to simplify your own hooks. Uncomment (remove the leading "// " from every
+// line below) to enable it, or edit an entry's output to
+// {"permissionDecision": "deny", "permissionDecisionReason": "..."} to block
+// a specific tool instead. Full hook reference:
+// https://docs.github.com/en/copilot/reference/hooks-reference
+//
+// {
+//   "version": 1,
+//   "hooks": {
+//     "PreToolUse": [
+//       {
+//         "type": "command",
+//         "bash": "cat >> \"$WS_RUN_DIR/user_log.jsonl\"; echo >> \"$WS_RUN_DIR/user_log.jsonl\"",
+//         "timeoutSec": 10
+//       }
+//     ]
+//   }
+// }
