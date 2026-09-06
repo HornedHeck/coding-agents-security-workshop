@@ -91,8 +91,13 @@ user-level file survives both repository workspaces?
 
 ### Case 3 — Forensic authority
 
-1. From the repository root, invoke `/challenge_3_analysis` before asking an
-   analysis agent to inspect `challenges/c3_postmortems/case_3/`.
+1. From the repository root, invoke the analysis skill before asking an agent
+   to inspect `challenges/c3_postmortems/case_3/`:
+
+   ```text
+   /challenge_3_analysis
+   ```
+
 2. Open the Case 3 artefacts and separate records related to `INC-C3-003` from
    unrelated mailbox, runtime, and network activity.
 3. Check any agent-produced conclusion against the victim transcript, raw

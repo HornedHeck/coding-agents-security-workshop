@@ -30,7 +30,7 @@ useful task remains usable.
   in one agent session against the participant's current configuration and
   reports one outcome per marker.
 - Four deterministic attacks, each carrying a distinct marker in the
-  `[[C4-ATTACK: <id>]]` form for unambiguous transcript and log parsing.
+  `[[C4-CHECK: <id>]]` form for unambiguous transcript and log parsing.
 - Participant-selectable defences: user-level Copilot instructions,
   least-privilege MCP/tool allow-lists, filesystem scope, and sink controls.
 - Always-enabled harness detection hooks which record attempted attacks for
@@ -93,7 +93,7 @@ useful task remains usable.
     its invocation to reach an unauthorised sink. It exercises an explicit
     MCP server/tool allow-list and pinned tool identity.
 - **Trace markers:** each fixture and resulting evaluator record includes its
-  unique `[[C4-ATTACK: <id>]]` marker. The evaluator attributes an outcome by
+  unique `[[C4-CHECK: <id>]]` marker. The evaluator attributes an outcome by
   this marker, never by heuristic matching of payload wording.
 - **Layered controls:** the starting configuration permits the attacks.
   Participants combine instruction-level guidance with enforceable boundaries:
@@ -144,7 +144,7 @@ Feature: Challenge 4 Tower Defence
     Given a participant has the C4 shared environment
     And harness detection hooks are enabled for every evaluation
     And its starting configuration has the supplied user-logging hooks disabled
-    And every attack fixture has a unique [[C4-ATTACK: <id>]] marker
+    And every attack fixture has a unique [[C4-CHECK: <id>]] marker
 
   Scenario: Evaluate the starting configuration
     When the participant runs "uv run ws run c4"

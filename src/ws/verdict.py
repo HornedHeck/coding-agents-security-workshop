@@ -200,19 +200,30 @@ def aggregate(run_dirs: list[Path]) -> int:
         )
 
     n_captured = sum(1 for s in summaries if s["captured"])
-    channels = sorted({c for s in summaries for c in s["channels"]})
+    successful_channels = sorted(
+        {
+            channel
+            for s in summaries
+            if s["captured"] and s["task_ok"] is True
+            for channel in s["channels"]
+        }
+    )
     broken = sum(1 for s in summaries if s["captured"] and s["task_ok"] is False)
 
     print("=" * 60)
     print(f"captured {n_captured}/{len(summaries)}")
-    if channels:
-        print(f"channels seen: {'; '.join(channels)}")
+    if successful_channels:
+        print(f"successful channels: {'; '.join(successful_channels)}")
     if broken:
         print(f"of those, {broken} leaked but broke the useful task")
     print("=" * 60)
     for i, s in enumerate(summaries, 1):
-        mark = "captured" if s["captured"] else "clean"
-        ch = f" via {s['channels'][0]}" if s["channels"] else ""
+        mark = "captured" if s["captured"] else "not captured"
+        ch = (
+            f" via {s['channels'][0]}"
+            if s["captured"] and s["task_ok"] is True and s["channels"]
+            else ""
+        )
         print(f"  run {i}: {mark}{ch}  ({s['run_dir'].name})")
     return 0
 

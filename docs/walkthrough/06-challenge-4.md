@@ -54,6 +54,13 @@ everything is therefore not a passing defence.
    uv run ws run c4
    ```
 
+   Add `--keyword <label>` to identify the three related run directories when
+   comparing configurations:
+
+   ```console
+   uv run ws run c4 --keyword baseline
+   ```
+
 2. Record which attacks leak and whether useful work completes.
 3. Inspect `config/mcp.json` and remove unnecessary `web`, `diagnostics`, and
    `repo_status` server entries.

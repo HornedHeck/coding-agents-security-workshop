@@ -53,9 +53,25 @@ the harness inserts your text into the agent's prepared injection surface.
    uv run ws run c1
    ```
 
+   > [!TIP]
+   > Every runnable challenge accepts an optional `--keyword <label>`. It adds
+   > an identifiable suffix to the run directories, which makes logs easier to
+   > find and compare. Use letters and numbers only; labels are limited to 10
+   > characters.
+
+   ```console
+   uv run ws run c1 --keyword firsttry
+   ```
+
 4. Read the verdict and the agent's reported output.
-5. Refine only your payload and run the challenge again.
-6. When you are finished, remove experimental text from the injection file.
+5. Optionally compare the result with the same scenario without your payload:
+
+   ```console
+   uv run ws run c1 --clean
+   ```
+
+6. Refine only your payload and run the challenge again.
+7. When you are finished, remove experimental text from the injection file.
 
 ### Key points
 

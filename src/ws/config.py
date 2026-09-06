@@ -218,8 +218,8 @@ C4_ATTACK_IDS = (
 )
 
 
-def c4_attack_marker(attack_id: str) -> str:
-    return f"[[C4-ATTACK: {attack_id}]]"
+def c4_check_marker(attack_id: str) -> str:
+    return f"[[C4-CHECK: {attack_id}]]"
 
 
 # c4 baseline allow-list (the participant's config/allowed_tools.txt starts

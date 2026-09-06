@@ -6,11 +6,11 @@ and `uv` to run the workshop CLI on the host.
 
 ## 1. Clone the prepared repository
 
-Clone the repository URL supplied by the facilitator, then open its root
-directory:
+The facilitator publishes the workshop repository before the session. Clone it,
+then open its root directory:
 
 ```console
-git clone <workshop repository URL>
+git clone https://github.com/HornedHeck/coding-agents-security-workshop
 cd coding-agents-security-workshop
 ```
 

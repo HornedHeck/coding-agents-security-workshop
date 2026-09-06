@@ -20,7 +20,7 @@ import json
 import os
 import sys
 
-from ws.config import ENV_CHALLENGE_DIR, ENV_RUN_DIR, c4_attack_marker
+from ws.config import ENV_CHALLENGE_DIR, ENV_RUN_DIR, c4_check_marker
 from ws.detect import canary_match
 from ws.mcp import _base
 
@@ -54,7 +54,7 @@ def _evaluate(payload: dict) -> dict | None:
             record = {
                 "ts": dt.datetime.now(dt.UTC).isoformat(),
                 "attack": attack_id,
-                "marker": c4_attack_marker(attack_id),
+                "marker": c4_check_marker(attack_id),
                 "tool": payload.get("tool_name"),
                 "fragment": fragment,
                 "leaked": True,
