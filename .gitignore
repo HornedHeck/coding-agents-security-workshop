@@ -5,19 +5,32 @@ __pycache__/
 build/
 dist/
 *.egg-info/
+.pytest_cache/
+.ruff_cache/
 
 # workshop runtime state
 challenges/*/runs/
+challenges/*/workspace/*
+!challenges/*/workspace/.gitkeep
 **/reads.jsonl
 **/verdict.json
 **/stream.jsonl
 .env
+# c2 ships a repo tree as challenge content; keep its .env canary
+!challenges/c2_channel_hunt/state/repo/acme-internal/.env
 
 # facilitator-only, not for participants
+challenges/*/solutions.md
+challenges/*/NOTES.md
+challenges/*/verified_channels.md
 facilitator/solutions.md
+solution.md
 
 # editors / OS
 .DS_Store
 .idea/
 .vscode/
 !.vscode/extensions.json
+
+# uv managed python pin
+.python-version

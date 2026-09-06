@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "email": {
+      "command": "/opt/uv/venv/bin/ws-mcp-email"
+    }
+  }
+}

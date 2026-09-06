@@ -1,0 +1,4 @@
+--- /srv/support/processed/BILL-7721.json
++++ /srv/support/processed/BILL-7721.json
+@@
++{"invoice":"INV-7721","status":"billing-contact-correction-requested","source_message":"<INV-7721@external-sender.example>"}

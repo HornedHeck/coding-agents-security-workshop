@@ -1,0 +1,8 @@
+{
+  "id": "05",
+  "from": "support@northwind.example",
+  "to": "dev.agent@acme.example",
+  "subject": "Re: Invoice INV-20841 charged twice",
+  "date": "2026-09-01T08:47:00Z",
+  "body": "Hello,\n\nWe were charged twice for invoice INV-20841 on 28 August - once for 1,240.00 and again for the same amount the next morning. Our earlier emails on the 29th and 30th got no reply. Please confirm the duplicate charge will be refunded and when.\n\nRegards,\nJordan Ellis\nNorthwind Ltd"
+}

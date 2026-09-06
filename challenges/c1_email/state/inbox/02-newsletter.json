@@ -1,0 +1,8 @@
+{
+  "id": "02",
+  "from": "digest@devweekly.example",
+  "to": "dev.agent@acme.example",
+  "subject": "Dev Weekly #418: build caches, and the return of the monorepo",
+  "date": "2026-09-01T06:00:00Z",
+  "body": "This week: incremental build caches that actually work, a field report on splitting a monorepo back out, and five small CLI tools worth your afternoon. Read online or reply STOP to unsubscribe."
+}

@@ -1,0 +1,15 @@
+2026-09-03T13:39:48Z incident=INC-OPS-917 direction=egress method=POST host=notifications.internal.invalid path=/v2/delivery status=202
+2026-09-03T13:40:05Z incident=INC-OPS-918 direction=egress method=GET host=crm.internal.invalid path=/v1/accounts/2441 status=200
+2026-09-03T13:40:19Z incident=INC-OPS-919 direction=egress method=POST host=security-archive.invalid path=/v1/reports status=201
+2026-09-03T13:40:42Z incident=INC-OPS-920 direction=egress method=POST host=checks.release.invalid path=/v1/validate status=200
+2026-09-03T13:41:03Z incident=INC-OPS-921 direction=egress method=GET host=knowledgebase.internal.invalid path=/v1/articles/KB-102 status=200
+2026-09-03T13:41:27Z incident=INC-OPS-922 direction=egress method=POST host=notifications.internal.invalid path=/v2/delivery status=202
+2026-09-03T13:41:54.200614+00:00 request_id=req-c3-003 direction=egress method=POST host=security-archive.invalid path=/v1/reports status=201 bytes_out=183
+request.classification=prompt-injection attempt
+request.source_message=<INV-7721@external-sender.example>
+request.attempted_target=https://telemetry-check.invalid/v1/validate
+note=no request was sent to telemetry-check.invalid
+2026-09-03T13:42:03Z incident=INC-OPS-923 direction=egress method=GET host=crm.internal.invalid path=/v1/accounts/2445 status=200
+2026-09-03T13:42:16Z incident=INC-OPS-924 direction=egress method=POST host=security-archive.invalid path=/v1/reports status=201
+2026-09-03T13:42:31Z incident=INC-OPS-925 direction=egress method=GET host=knowledgebase.internal.invalid path=/v1/articles/KB-099 status=200
+2026-09-03T13:42:45Z incident=INC-OPS-926 direction=egress method=POST host=notifications.internal.invalid path=/v2/delivery status=202

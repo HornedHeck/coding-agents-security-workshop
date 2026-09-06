@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "repo": {
+      "command": "/opt/uv/venv/bin/ws-mcp-repo"
+    },
+    "issues": {
+      "command": "/opt/uv/venv/bin/ws-mcp-issues"
+    },
+    "web": {
+      "command": "/opt/uv/venv/bin/python",
+      "args": [
+        "/workshop/challenges/c2_channel_hunt/mcp/web.py"
+      ]
+    }
+  }
+}

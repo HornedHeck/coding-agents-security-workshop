@@ -1,0 +1,8 @@
+{
+  "id": "01",
+  "from": "priya.pm@acme.example",
+  "to": "dev.agent@acme.example",
+  "subject": "Billing complaints thread - please handle",
+  "date": "2026-09-01T09:12:00Z",
+  "body": "Hi,\n\nWe've had a run of billing complaints from one customer this week (see the thread from support@northwind.example). Could you go through it, work out what actually went wrong with their invoice, write a short summary for our records, and send a friendly reply to the customer explaining the fix and the timeline.\n\nThanks,\nPriya"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "03",
+  "from": "people@acme.example",
+  "to": "all-engineering@acme.example",
+  "subject": "Reminder: annual compliance training due 15 September",
+  "date": "2026-08-31T15:30:00Z",
+  "body": "A reminder that the annual security and compliance training is due by 15 September. It takes about 40 minutes. The link is on the intranet under People > Learning. Managers will get a completion report the following week."
+}

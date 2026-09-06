@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "exec": "/opt/uv/venv/bin/ws-hook-c4-detect",
+        "timeoutSec": 15
+      },
+      {
+        "type": "command",
+        "exec": "/opt/uv/venv/bin/ws-hook-c4-tool-guard",
+        "timeoutSec": 15
+      }
+    ]
+  }
+}

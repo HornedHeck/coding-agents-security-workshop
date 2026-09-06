@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+textkit/static/vendor.min.js linguist-vendored
+docs/latest linguist-generated
+*.min.js -diff

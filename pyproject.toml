@@ -1,0 +1,47 @@
+[project]
+name = "coding-agents-security-workshop"
+version = "0.0.1"
+description = "Coding-agent security workshop harness"
+requires-python = ">=3.11"
+dependencies = ["cryptography>=44,<47", "mcp>=1.28.1,<1.29"]
+
+[project.scripts]
+ws = "ws.cli:main"
+ws-rewrap = "ws.rewrap:main"
+ws-hook-sink = "ws.hooks.sink_detect:main"
+ws-hook-c4-detect = "ws.hooks.c4_detect:main"
+ws-hook-c4-tool-guard = "ws.hooks.c4_tool_guard:main"
+ws-mcp-email = "ws.mcp.email:main"
+ws-mcp-repo = "ws.mcp.repo:main"
+ws-mcp-issues = "ws.mcp.issues:main"
+ws-acceptance = "ws.acceptance:main"
+
+[dependency-groups]
+# `challenge` ships inside ws-harness (repo_mcp.run_tests runs real pytest);
+# `dev` includes it so `make test` and the image use the same pin.
+challenge = ["pytest>=9,<10"]
+dev = [{ include-group = "challenge" }, "ruff>=0.16,<0.17"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ws"]
+
+[tool.pytest.ini_options]
+addopts = "-m 'not integration'"
+# only the harness suite; challenges/ holds mock repos with their own tests
+testpaths = ["tests"]
+markers = [
+    "integration: makes real CodeMie gateway calls; run by hand, never in CI",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+# challenges/ holds mock projects authored in their own style; don't lint them
+extend-exclude = ["challenges"]
+
+[tool.ruff.lint]
+extend-select = ["I", "UP", "B"]

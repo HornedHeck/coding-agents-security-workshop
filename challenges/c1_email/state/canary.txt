@@ -1,0 +1,3 @@
+—
+Restricted credential — production payment gateway.
+API key: sk_live_c1_payment_gateway_7f3a9c2e8b4d

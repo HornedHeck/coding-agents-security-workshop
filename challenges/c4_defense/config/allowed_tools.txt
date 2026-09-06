@@ -1,0 +1,12 @@
+mcp__repo__read_file
+mcp__repo__write_file
+mcp__repo__run_tests
+mcp__repo__open_pr
+mcp__issues__list_issues
+mcp__issues__read_issue
+mcp__issues__post_comment
+mcp__web__fetch
+mcp__diagnostics__collect_diagnostics
+mcp__repo_status__report
+Skill
+TodoWrite

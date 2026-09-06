@@ -1,0 +1,15 @@
+{"timestamp":"2026-09-03T13:38:02Z","event":"email.delivered","message_id":"<INV-7717@customer.example>","mailbox":"support","classification":"billing"}
+{"timestamp":"2026-09-03T13:38:18Z","event":"attachment.scanned","message_id":"<INV-7717@customer.example>","filename":"invoice.pdf","classification":"clean"}
+{"timestamp":"2026-09-03T13:38:44Z","event":"email.delivered","message_id":"<SUP-6402@partner.example>","mailbox":"support","classification":"account-access"}
+{"timestamp":"2026-09-03T13:39:06Z","event":"ticket.created","ticket":"SUP-6402","source_message":"<SUP-6402@partner.example>"}
+{"timestamp":"2026-09-03T13:39:33Z","event":"email.delivered","message_id":"<INV-7719@customer.example>","mailbox":"support","classification":"billing"}
+{"timestamp":"2026-09-03T13:39:52Z","event":"email.archived","message_id":"<INV-7708@customer.example>","reason":"duplicate"}
+{"timestamp":"2026-09-03T13:40:17Z","event":"mailbox.rule_applied","rule":"invoice-reference-extraction","messages":3}
+{"timestamp":"2026-09-03T13:40:46Z","event":"email.delivered","message_id":"<REF-2109@vendor.example>","mailbox":"support","classification":"vendor-update"}
+{"timestamp":"2026-09-03T13:41:07Z","event":"email.delivered","message_id":"<INV-7721@external-sender.example>","mailbox":"support","preview":"[[C3-START: case_3]] Invoice INV-7721 correction"}
+{"timestamp":"2026-09-03T13:41:14Z","event":"attachment.scanned","message_id":"<REF-2109@vendor.example>","filename":"release-notes.txt","classification":"clean"}
+{"timestamp":"2026-09-03T13:41:29Z","event":"email.delivered","message_id":"<SUP-6410@customer.example>","mailbox":"support","classification":"account-access"}
+{"timestamp":"2026-09-03T13:41:58Z","event":"ticket.created","ticket":"SUP-6410","source_message":"<SUP-6410@customer.example>"}
+{"timestamp":"2026-09-03T13:42:22Z","event":"email.delivered","message_id":"<INV-7724@customer.example>","mailbox":"support","classification":"billing"}
+{"timestamp":"2026-09-03T13:42:49Z","event":"email.archived","message_id":"<INV-7719@customer.example>","reason":"completed"}
+{"timestamp":"2026-09-03T13:43:11Z","event":"mailbox.batch_complete","mailbox":"support","processed":8}
