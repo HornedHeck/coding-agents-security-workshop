@@ -9,10 +9,10 @@ all their time in the attacker role — so the threat is felt, not just recounte
 Core message: **human-in-the-loop no longer works as a defence**, yet everyone
 implicitly relies on it.
 
-- Confirmations have become theatre. Users approve ~93% of an agent's permission
-  prompts — approval fatigue makes interactive confirmation behaviourally
-  unreliable as the sole safety mechanism
-  (arxiv 2607.13718, "How Agents Ask for Permission").
+- Confirmations have become theatre. Anthropic's telemetry shows Claude Code
+  users approve ~93% of permission prompts — approval fatigue makes interactive
+  confirmation behaviourally unreliable as the sole safety mechanism
+  (Anthropic, "How we contain Claude across products").
 - Same pattern as browser warning fatigue: people click through 90%+ of SSL
   warnings without reading them. One agentic task = dozens of prompts in a row →
   a reflexive "yes".
@@ -34,7 +34,8 @@ exploited and how to close it.
 
 ### Sources for slides
 
-- https://arxiv.org/abs/2607.13718 — How Agents Ask for Permission (93% approval)
+- https://www.anthropic.com/engineering/how-we-contain-claude — How we contain Claude across products (93% approval, 84% prompt reduction via sandbox)
+- https://arxiv.org/abs/2607.13718 — How Agents Ask for Permission (permission-model taxonomy; note: does not itself state the 93% figure)
 - https://arxiv.org/pdf/2606.05647 — Coding with "Enemy": Can Human Developers Detect AI Agent Sabotage?
 - https://arxiv.org/html/2601.13597 — Measuring the Impact of Coding Agents on Software Development
 - https://arxiv.org/pdf/2604.13536 — Don't Let AI Agents YOLO Your Files
