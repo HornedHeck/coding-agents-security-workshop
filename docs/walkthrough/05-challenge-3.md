@@ -1,4 +1,4 @@
-# Challenge 3 — Reconstruct the incidents
+# Challenge 3 — Post Mortem
 
 ## Goal and setup
 

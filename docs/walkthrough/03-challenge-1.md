@@ -1,4 +1,4 @@
-# Challenge 1 — Write the payload
+# Challenge 1 — Silicon Fishing
 
 ## Goal and setup
 
