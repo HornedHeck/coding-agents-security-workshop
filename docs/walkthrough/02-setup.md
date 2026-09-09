@@ -15,7 +15,7 @@ cd coding-agents-security-workshop
 
 Docker packages an application together with everything it needs to run into a container: a lightweight, isolated sandbox on top of your operating system. We use it for two reasons. First, isolation: the agent, its tools, and the synthetic secrets all live inside the container, so a successful attack never touches your real files, credentials, or network. Second, reproducibility: everyone runs the exact same environment, and every challenge starts from a clean, identical image.
 
-Install and start Docker using the [official Docker Desktop documentation](https://docs.docker.com/get-started/introduction/get-docker-desktop/), following the instructions for your operating system.
+Install and start Docker using the [official Docker installation instructions](https://docs.docker.com/get-started/get-docker/), following the instructions for your operating system.
 
 Confirm that the Docker daemon is running:
 
@@ -27,7 +27,7 @@ docker info
 
 CodeMie is a proxy to LLMs and coding agents developed and provided by EPAM. Log in with your EPAM email via SSO and you get enough credit not just for this workshop but for other activities too. The workshop agent uses it for model access, so without it the challenges cannot start.
 
-Install CodeMie using the [official CodeMie CLI README](https://github.com/codemie-ai/codemie-code#readme), then authenticate via SSO with your EPAM email:
+Install CodeMie using the [official CodeMie CLI repository](https://github.com/codemie-ai/codemie-code), then authenticate via SSO with your EPAM email:
 
 ```console
 npm install -g @codemieai/code
@@ -41,7 +41,7 @@ CodeMie signs in on your host. Do not copy, edit, or manually mount CodeMie cred
 
 `uv` is a fast Python package manager. It creates the isolated environment for the workshop CLI (`ws`), which is the single command you use to build images, start challenges, and check your results.
 
-Install `uv` using the [official uv installation documentation](https://docs.astral.sh/uv/getting-started/installation/).
+Install `uv` using the [official uv installation documentation](https://docs.astral.sh/uv/#installation).
 
 From the repository root, install the workshop dependencies:
 
